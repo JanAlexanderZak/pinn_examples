@@ -1,4 +1,4 @@
-# Applied Ressources
+# Applied Ressources for continuous-time and discrete-time PINNs
 
 **Maziar Raissi** (Brown University)  
 - https://github.com/maziarraissi/PINNs  
