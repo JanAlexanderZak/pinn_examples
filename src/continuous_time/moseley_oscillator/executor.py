@@ -19,6 +19,7 @@ def main():
         devices=-1,
         sample_size=1,
         pin_memory=False,
+        persistent_workers=True,
     )
 
     hyper_parameters = {

@@ -87,6 +87,7 @@ class MoseleyPINNDataModule(pl.LightningDataModule):
             self.dataset_train,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            persistent_workers=self.hparams.persistent_workers,
             shuffle=True,
         )
     
@@ -95,6 +96,7 @@ class MoseleyPINNDataModule(pl.LightningDataModule):
             self.dataset_val,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            persistent_workers=self.hparams.persistent_workers,
             shuffle=False,
         )
 
@@ -103,6 +105,7 @@ class MoseleyPINNDataModule(pl.LightningDataModule):
             self.dataset_test,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            persistent_workers=self.hparams.persistent_workers,
             shuffle=False,
         )
     
@@ -111,5 +114,6 @@ class MoseleyPINNDataModule(pl.LightningDataModule):
             self.dataset_test,
             batch_size=self.hparams.batch_size,
             num_workers=self.hparams.num_workers,
+            persistent_workers=self.hparams.persistent_workers,
             shuffle=False,
         )
