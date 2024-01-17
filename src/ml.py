@@ -56,7 +56,7 @@ def train_val_test_split(
 
     for target_column in target_columns:
         assert target_column not in x_complete
-    assert len(x_complete.columns) > len(y_complete.columns)
+    assert len(x_complete.columns) >= len(y_complete.columns)
 
     x_train, x_val_test, y_train, y_val_test = train_test_split(
         x_complete,
