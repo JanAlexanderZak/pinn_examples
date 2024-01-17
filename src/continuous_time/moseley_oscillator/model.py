@@ -186,7 +186,6 @@ class MoseleyPINNRegressor(pl.LightningModule):
     def training_step(self, train_batch, batch_idx) -> float:
         # * Part 1: Calculation
         x_train, y_train = train_batch
-        #x_train = x_train.clone()
         total = int(torch.tensor(len(y_train)))
         
         y_pred = self.forward(x_train)
