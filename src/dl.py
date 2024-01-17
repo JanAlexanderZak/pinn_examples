@@ -13,6 +13,7 @@ class DeepLearningArguments:
         devices: int = 1,
         sample_size: float = 1,
         pin_memory: bool = False,
+        persistent_workers: bool = True,
     ) -> None:
         self.seed = float(seed)
         self.batch_size = int(batch_size)
@@ -24,3 +25,4 @@ class DeepLearningArguments:
         self.devices = int(devices)
         self.sample_size = float(sample_size)
         self.pin_memory = pin_memory
+        self.persistent_workers = persistent_workers
