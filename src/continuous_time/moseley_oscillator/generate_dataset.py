@@ -22,7 +22,10 @@ def generate_dataset(path: str = "./src/continuous_time/moseley_oscillator/data/
     t_obs = torch.rand(40).view(-1,1)
     u_obs = exact_solution(d, w0, t_obs) + 0.04 * torch.randn_like(t_obs)
 
-    df = pd.DataFrame(data=np.concatenate([t_obs, u_obs], axis=1), columns=["t_obs", "u_obs"])
+    df = pd.DataFrame(
+        data=np.concatenate([t_obs, u_obs], axis=1),
+        columns=["t_obs", "u_obs"],
+    )
     df.to_parquet(path)
 
 
