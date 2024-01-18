@@ -36,15 +36,15 @@ def generate_dataset(path: str = "./src/continuous_time/raissi_burgers/data/",):
     y_true = np.real(data["usol"]).T
 
     X, T = np.meshgrid(x_domain, t_domain)  # (100, 256), (100, 256)
-    y_true = np.hstack((
+    X_star = np.hstack((
         X.flatten().reshape(-1, 1),
         T.flatten().reshape(-1, 1),
     ))  # (256*100=25600, 1)
     y_true_flat = y_true.flatten().reshape(-1, 1)  # (256*100=25600, 1)
 
     # * Boundary conditions
-    lower_boundary = y_true.min(axis=0)
-    upper_boundary = y_true.max(axis=0)
+    lower_boundary = X_star.min(axis=0)
+    upper_boundary = X_star.max(axis=0)
 
     # Initial condition
     x_train_IC = np.hstack((X[0:1, :].T, T[0:1, :].T))     # (256, 2)
@@ -72,7 +72,7 @@ def generate_dataset(path: str = "./src/continuous_time/raissi_burgers/data/",):
     np.save(os.path.join(path, "X_u_train"), x_train_BC)
     np.save(os.path.join(path, "u_train"), y_train_BC)
     np.save(os.path.join(path, "X_f_train"), x_train)
-    np.save(os.path.join(path, "X_star"), y_true)
+    np.save(os.path.join(path, "X_star"), X_star)
 
 if __name__ == "__main__":
     generate_dataset()
