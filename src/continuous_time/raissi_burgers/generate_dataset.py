@@ -36,40 +36,43 @@ def generate_dataset(path: str = "./src/continuous_time/raissi_burgers/data/",):
     y_true = np.real(data["usol"]).T
 
     X, T = np.meshgrid(x_domain, t_domain)  # (100, 256), (100, 256)
-    X_star = np.hstack((
+    y_true = np.hstack((
         X.flatten().reshape(-1, 1),
         T.flatten().reshape(-1, 1),
     ))  # (256*100=25600, 1)
     y_true_flat = y_true.flatten().reshape(-1, 1)  # (256*100=25600, 1)
 
     # * Boundary conditions
-    lower_boundary = X_star.min(axis=0)
-    upper_boundary = X_star.max(axis=0)
+    lower_boundary = y_true.min(axis=0)
+    upper_boundary = y_true.max(axis=0)
 
-    xx1 = np.hstack((X[0:1, :].T, T[0:1, :].T))     # (256, 2)
-    uu1 = y_true[0:1, :].T                          # (256, 1)
-    xx2 = np.hstack((X[:, 0:1], T[:, 0:1]))         # (100, 2)
-    uu2 = y_true[:, 0:1]                            # (100, 1)
-    xx3 = np.hstack((X[:, -1:], T[:, -1:]))         # (100, 2)
-    uu3 = y_true[:, -1:]                            # (100, 1)
+    # Initial condition
+    x_train_IC = np.hstack((X[0:1, :].T, T[0:1, :].T))     # (256, 2)
+    y_train_IC = y_true[0:1, :].T                          # (256, 1)
 
-    all_X_u_train = np.vstack([xx1, xx2, xx3])
-    all_u_train = np.vstack([uu1, uu2, uu3])
+    # Boundary condition
+    x_train_BC_lb = np.hstack((X[:, 0:1], T[:, 0:1]))         # (100, 2)
+    y_train_BC_lb = y_true[:, 0:1]                            # (100, 1)
+    x_train_BC_ub = np.hstack((X[:, -1:], T[:, -1:]))         # (100, 2)
+    y_train_BC_ub = y_true[:, -1:]                            # (100, 1)
+
+    all_x_train_BC = np.vstack([x_train_IC, x_train_BC_lb, x_train_BC_ub])
+    all_y_train_BC = np.vstack([y_train_IC, y_train_BC_lb, y_train_BC_ub])
 
     # * Sample collocation
-    X_f_train = lower_boundary + (upper_boundary - lower_boundary) * lhs(2, collocation_points)
-    X_f_train = np.vstack((X_f_train, all_X_u_train))  # (10000+456=10456, 2)
+    x_train = lower_boundary + (upper_boundary - lower_boundary) * lhs(2, collocation_points)
+    x_train = np.vstack((x_train, all_x_train_BC))  # (10000+456=10456, 2)
     
     # * Final data
-    idx = np.random.choice(all_X_u_train.shape[0], N_u, replace=False)
-    X_u_train = all_X_u_train[idx, :]   # (100, 2)
-    u_train = all_u_train[idx, :]       # (100, 1)
+    idx = np.random.choice(all_x_train_BC.shape[0], N_u, replace=False)
+    x_train_BC = all_x_train_BC[idx, :]   # (100, 2)
+    y_train_BC = all_y_train_BC[idx, :]       # (100, 1)
 
     # * Save
-    np.save(os.path.join(path, "X_u_train"), X_u_train)
-    np.save(os.path.join(path, "u_train"), u_train)
-    np.save(os.path.join(path, "X_f_train"), X_f_train)
-    np.save(os.path.join(path, "X_star"), X_star)
+    np.save(os.path.join(path, "X_u_train"), x_train_BC)
+    np.save(os.path.join(path, "u_train"), y_train_BC)
+    np.save(os.path.join(path, "X_f_train"), x_train)
+    np.save(os.path.join(path, "X_star"), y_true)
 
 if __name__ == "__main__":
     generate_dataset()
