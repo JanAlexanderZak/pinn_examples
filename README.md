@@ -15,7 +15,7 @@ $$
 m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0,
 $$
 An implementation detail is that the time domain is added as a hyperparameter. In this case, the evolution of $\mu$ is of interest. The plot is not reproduced here.
-![]([files/Users/jzhang/Desktop/Isolated.png](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png))
+![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png)
 
 
 # Applied Ressources for continuous-time and discrete-time PINNs
