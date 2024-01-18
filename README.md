@@ -4,9 +4,9 @@ This repository is a collection of continuous-time and discrete-time physics-inf
 
 
 The **first** example is Raissi's solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
-$$
+```math
 \dfrac{d u}{d t} + u \dfrac{d u}{d x} = v \dfrac{d^2 u}{d x^2},
-$$
+```
 The aim is to train a neural network that can be used for inference. An implementation detail is that the time domain is added via a concatenated dataset. With increasing epochs from 500 to 20000, the solution gets approximated more accurately:
 ![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/raissi_burgers/raissi_burgers.gif)
 
