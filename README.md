@@ -1,3 +1,8 @@
+# PINN examples with a software-engineering approach
+
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/raissi_burgers/raissi_burgers.gif)
+
+
 # Applied Ressources for continuous-time and discrete-time PINNs
 
 **Maziar Raissi** (Brown University)  
