@@ -174,14 +174,15 @@ class RaissiPINNRegressor(pl.LightningModule):
     def training_step(self, train_batch, batch_idx) -> float:
         # * Part 1: Calculation
         
-        x_train_BC, y_train_BC = train_batch[0]
-        x_train_PDE = train_batch[1][0]
+        x_train_BC, y_train_BC = train_batch[1]
+        x_train_PDE = train_batch[0][0]
 
-        x_u = torch.tensor(x_train_BC[:, 0:1], requires_grad=True).float()
-        t_u = torch.tensor(x_train_BC[:, 1:2], requires_grad=True).float()
+        # This is necessary bcs of autograd graph
+        #x_u = torch.tensor(x_train_BC[:, 0:1], requires_grad=True).float()
+        #t_u = torch.tensor(x_train_BC[:, 1:2], requires_grad=True).float()
         x_f = torch.tensor(x_train_PDE[:, 0:1], requires_grad=True).float()
         t_f = torch.tensor(x_train_PDE[:, 1:2], requires_grad=True).float()
-        u = torch.tensor(y_train_BC[:, 0:1], requires_grad=True).float()
+        #u = torch.tensor(y_train_BC[:, 0:1], requires_grad=True).float()
        
         total_BC = int(torch.tensor(len(x_train_BC)))
         total_PDE = int(torch.tensor(len(x_train_PDE)))

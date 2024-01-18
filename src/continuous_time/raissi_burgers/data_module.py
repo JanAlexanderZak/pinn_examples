@@ -1,8 +1,8 @@
-""" DataModule for Moseley's harmonic oscillator.
+""" DataModule for Raissi's Burgers equation.
 """
 import os
 
-from typing import Callable, List, Tuple
+from typing import Callable, Tuple
 
 import pandas as pd
 import numpy as np
@@ -51,11 +51,6 @@ class ConcatDatasets(torch.utils.data.Dataset):
 
 
 class RaissiPINNDataModule(pl.LightningDataModule):
-
-    TRAIN_RATIO = 0.6
-    VAL_RATIO = 0.2
-    TEST_RATIO = 0.2
-
     def __init__(
         self,
         path_to_data: str,
@@ -90,20 +85,20 @@ class RaissiPINNDataModule(pl.LightningDataModule):
 
     def setup(self) -> None:
         # Load, create dataset
-        X_u_train, u_train, X_f_train, X_star = self.load_data(self.hparams.path_to_data)
+        x_train_BC, y_train_BC, data_collocation, X_star = self.load_data(self.hparams.path_to_data)
 
         self.column_names = list(["x", "t"])
         self.target_names = list(["y"])
-        self.in_features = X_u_train.shape[1]
-        self.out_features = u_train.shape[1]
+        self.in_features = x_train_BC.shape[1]
+        self.out_features = y_train_BC.shape[1]
 
         self.dataset_train = torch.utils.data.TensorDataset(
-            torch.Tensor(X_u_train),
-            torch.Tensor(u_train),
+            torch.Tensor(data_collocation),
         )
 
         self.dataset_train_BC = torch.utils.data.TensorDataset(
-            torch.Tensor(X_f_train),
+            torch.Tensor(x_train_BC),
+            torch.Tensor(y_train_BC),
         )
 
         self.dataset_test = torch.utils.data.TensorDataset(

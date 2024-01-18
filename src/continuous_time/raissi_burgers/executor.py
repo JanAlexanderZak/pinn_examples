@@ -54,8 +54,8 @@ def main(epochs):
     test_loader = data_module.test_dataloader()
 
     for index, (x, BC) in enumerate(train_loader):
-        print(x[0].shape, x[1].shape)
-        print(x[0], x[1])
+        print(x[0].shape)
+        print(x[0])
         break
 
     # Callbacks
