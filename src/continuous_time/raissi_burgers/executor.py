@@ -96,5 +96,4 @@ def main(epochs):
     torch.save(u_pred, f"./src/continuous_time/raissi_burgers/data/predictions/predictions_{epoch}.pkl")
 
 if __name__ == "__main__":
-    for epoch in np.arange(500, 20500, 500):
-        main(epoch)
+    main(20500)
