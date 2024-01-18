@@ -93,7 +93,7 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))          
-    torch.save(u_pred, f"./src/continuous_time/raissi_burgers/data/predictions/predictions_{epoch}.pkl")
+    torch.save(u_pred, f"./src/continuous_time/raissi_burgers/data/predictions/predictions_{epochs}.pkl")
 
 if __name__ == "__main__":
     main(20500)
