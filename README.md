@@ -19,6 +19,14 @@ An implementation detail is that the time domain is added as a hyperparameter. I
 
 ![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png)  
 
+The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
+```math
+m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma,
+```
+An implementation detail is the source term $\sigma$. The plot compares the analytical solution with the prediction of the PINN:  
+
+![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/heat_eq_1d/analytical_vs_pinn.png)  
+
 
 # Applied Ressources for continuous-time and discrete-time PINNs
 
