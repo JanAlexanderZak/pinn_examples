@@ -81,7 +81,6 @@ def generate_dataset(path: str = "src/continuous_time/heat_eq_1d/data",):
     x_train = lower_boundary + (upper_boundary - lower_boundary) * lhs(2, 1000)
     x_train = np.vstack((x_train, x_train_BC))  # (10000+456=10456, 2)
 
-
     # * Final data
     idx = np.random.choice(x_train_BC.shape[0], 100, replace=False)
     x_train_BC = x_train_BC[idx, :]   # (100, 2)
