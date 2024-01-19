@@ -1,4 +1,4 @@
-""" Executable example of Raissi's Burger's equation in PyTorch Lightning.
+""" Executable example of 1D heat equation in PyTorch Lightning.
 """
 import pytorch_lightning as pl
 import torch
@@ -32,7 +32,6 @@ def main(epochs):
         "weight_decay": 1e-3,
         "scheduler_monitor": "train_loss",
         "learning_rate": 1e-4,
-        "loss_IC_param": 1,
         "loss_BC_param": 1,
         "loss_PDE_param": 1,
         "num_hidden_layers": 8,
