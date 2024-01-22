@@ -209,7 +209,7 @@ class RaissiPINNRegressor(pl.LightningModule):
         F = 5.0 * y_pred_IC_minus - 5.0 * y_pred_IC_minus ** 3 + 0.0001 * u_IC_xx
         U0 = y_pred_IC - 0.8 * torch.matmul(F, self.irk_weights.T)
 
-        loss_IC = self.pinn_losses.loss_function_IC(U0, y_train_IC)
+        loss_IC = self.pinn_losses.loss_function_IC(U0, y_train_IC) * self.hparams.loss_IC_param
 
         y_pred_BC = self.forward(x_train_BC)
 
