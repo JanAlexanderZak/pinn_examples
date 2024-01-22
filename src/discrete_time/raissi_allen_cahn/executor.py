@@ -24,22 +24,22 @@ def main(epochs):
 
     hyper_parameters = {
         "activation_function": torch.nn.Tanh,
-        "layer_initialization": torch.nn.init.xavier_uniform_, #torch.nn.init.xavier_normal_
-        "optimizer": torch.optim.Adam,
+        "layer_initialization": torch.nn.init.xavier_normal_, #torch.nn.init.xavier_normal_
+        "optimizer": torch.optim.LBFGS,
         "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau,
-        "scheduler_patience": 50,
+        "scheduler_patience": 200,
         "weight_decay": 0,
         "scheduler_monitor": "train_loss",
         "learning_rate": 1e-4,  #1e-4 worked but slow
         "loss_BC_param": 1,
-        "loss_PDE_param": 1,
+        "loss_IC_param": 100,  # 100 worked
         "num_hidden_layers": 4,
         "size_hidden_layers": 200,
         "dropout": False,
         "dropout_p": 0.1,
         "batch_normalization": False,
     }
-
+    
     data_module = RaissiPINNDataModule(
         path_to_data="./src/discrete_time/raissi_allen_cahn/data/",
         args=args,
@@ -56,11 +56,11 @@ def main(epochs):
         break
 
     # Callbacks
-    # logger = pl.loggers.TensorBoardLogger(
-    #     save_dir="",
-    #     name=f"{ISO_DATE}_drop{hyper_parameters['dropout']}_bn{hyper_parameters['batch_normalization']}_dataloss{hyper_parameters['loss_data_param']}",
-    # )
-    early_stopping = pl.callbacks.EarlyStopping("train_loss", patience=100, verbose=True,)
+    logger = pl.loggers.TensorBoardLogger(
+        save_dir="",
+        name=f"21012024",
+    )
+    early_stopping = pl.callbacks.EarlyStopping("train_loss", patience=1000, verbose=True,)
     model_summary = pl.callbacks.ModelSummary(max_depth=1)
 
     model = RaissiPINNRegressor(
@@ -73,6 +73,7 @@ def main(epochs):
     model.hparams.update(data_module.hparams)
     
     trainer = pl.Trainer(
+        logger=logger,
         callbacks=[early_stopping, model_summary],
         max_epochs=args.max_epochs,
         sync_batchnorm=args.sync_batchnorm,
@@ -90,7 +91,8 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))          
-    torch.save(u_pred, f"./src/discrete_time/raissi_allen_cahn/data/predictions/predictions_{epochs}.pkl")
+    torch.save(u_pred, f"./src/discrete_time/raissi_allen_cahn/data/predictions/predictions_{hyper_parameters['learning_rate']}_{hyper_parameters['loss_IC_param']}_{hyper_parameters['num_hidden_layers']}_{hyper_parameters['size_hidden_layers']}.pkl")
+
 
 if __name__ == "__main__":
-    main(100000)
+    main(200000)
