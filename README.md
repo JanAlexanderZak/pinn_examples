@@ -45,10 +45,10 @@ An implementation detail is the source term $\sigma$. The plot compares the anal
 ## Raissi's Burgers Equation (discrete-time) 
 The **fifth** example is Raissi's discrete-time solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
 This solves the PDE with only two time-snapshots at t0 and t1. The neural network outputs $q$ stages of the [Runge-Kutta](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) method, representing the time discretization. Raissi's paper reports an error of 0.007 [PINN Part I](https://arxiv.org/pdf/1711.10561.pdf). Here 0.0051 is achieved. Obviously, the training did not fully converge. The boundary conditions are not met.
-![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_burgers/t1_prediction.png)  
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/pred_t1.png)  
 
 The training exhibited a high volatility and LBFGS produced better predictions than Adam.
-![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_burgers/loss_plot.png)  
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/loss_plot.png)  
 
 # (Applied) Ressources for continuous-time and discrete-time PINNs
 
