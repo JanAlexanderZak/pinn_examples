@@ -29,9 +29,7 @@ m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0,
 ```
 An implementation detail is that the time domain is added as a hyperparameter. In this case, the evolution of $\mu$ is of interest. The plot is not reproduced here.  
 
-![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png)  
-
-<img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png" width="400" height="250" />
+<img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png" width="250" height="250" />
 
 ## Heat Equation 1D (continuous-time)  
 The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
@@ -45,11 +43,13 @@ An implementation detail is the source term $\sigma$. The plot compares the anal
 
 ## Raissi's Burgers Equation (discrete-time) 
 The **fifth** example is Raissi's discrete-time solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
-This solves the PDE with only two time-snapshots at t0 and t1. The neural network outputs $q$ stages of the [Runge-Kutta](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) method, representing the time discretization. Raissi's paper reports an error of 0.007 [PINN Part I](https://arxiv.org/pdf/1711.10561.pdf). Here 0.0051 is achieved. Obviously, the training did not fully converge. The boundary conditions are not met.
-![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/pred_t1.png)  
+This solves the PDE with only two time-snapshots at t0 and t1. The neural network outputs $q$ stages of the [Runge-Kutta](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) method, representing the time discretization. Raissi's paper reports an error of 0.007 [PINN Part I](https://arxiv.org/pdf/1711.10561.pdf). Here 0.0051 is achieved. Obviously, the training did not fully converge. The boundary conditions are not met.  
 
-The training exhibited a high volatility and LBFGS produced better predictions than Adam.
-![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/loss_plot.png)  
+<img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/pred_t1.png" width="400" height="250" />
+
+The training exhibited a high volatility and LBFGS produced better predictions than Adam.  
+
+<img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/loss_plot.png" width="400" height="250" />
 
 # (Applied) Ressources for continuous-time and discrete-time PINNs
 
