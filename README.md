@@ -8,6 +8,7 @@ This repository is a collection of continuous-time and discrete-time physics-inf
   - [Raissi's Burgers Equation (continuous-time)](#raissis-burgers-equation-continuous-time)
   - [Moseley's Damped Harmonic Oscillator (continuous-time)](#moseleys-damped-harmonic-oscillator-continuous-time)
   - [Heat Equation 1D (continuous-time)](#heat-equation-1d-continuous-time)
+  - [Heat Equation 2D (continuous-time)](#heat-equation-2d-continuous-time)
   - [Raissi's Burgers Equation (discrete-time)](#raissis-burgers-equation-discrete-time)
 - [(Applied) Ressources for continuous-time and discrete-time PINNs](#applied-ressources-for-continuous-time-and-discrete-time-pinns)
 
@@ -39,6 +40,14 @@ m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma,
 An implementation detail is the source term $\sigma$. The plot compares the analytical solution with the prediction of the PINN:  
 
 ![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/heat_eq_1d/analytical_vs_pinn.png)  
+
+
+## Heat Equation 2D (continuous-time)  
+The **fourth** example solves the two-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
+```math
+m \dfrac{d u}{d t} = \alpha \left( \dfrac{d^2 u}{d x^2} + \dfrac{d^2 u}{d y^2} \right),
+```
+Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one vertex.
 
 
 ## Raissi's Burgers Equation (discrete-time) 
