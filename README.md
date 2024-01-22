@@ -47,7 +47,7 @@ This solves the PDE with only two time-snapshots at t0 and t1. The neural networ
 
 <img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/pred_t1.png" width="400" height="250" />
 
-The training exhibited a high volatility and LBFGS produced better predictions than Adam.  
+The training exhibits a high volatility. Three examplatory models are shown in the following figure. Other versions were significantly worse or did not start convergence at all.
 
 <img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_allen_cahn/loss_plot.png" width="400" height="250" />
 
