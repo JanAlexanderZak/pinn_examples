@@ -1,10 +1,10 @@
-# PINN examples with a software-engineering approach
+# PINN examples with Pytorch Lightning
 This repository is a collection of continuous-time and discrete-time physics-informed neural networks (PINNs) implemented in Pytorch Lightning.
 
 
 <summary><h2>Table of Contents</h2></summary>
 
-- [PINN examples with a software-engineering approach](#pinn-examples-with-a-software-engineering-approach)
+- [PINN examples with Pytorch Lightning](#pinn-examples-with-pytorch-lightning)
   - [Raissi's Burgers Equation (continuous-time)](#raissis-burgers-equation-continuous-time)
   - [Moseley's Damped Harmonic Oscillator (continuous-time)](#moseleys-damped-harmonic-oscillator-continuous-time)
   - [Heat Equation 1D (continuous-time)](#heat-equation-1d-continuous-time)
