@@ -1,8 +1,18 @@
 # PINN examples with a software-engineering approach
-
 This repository is a collection of continuous-time and discrete-time physics-informed neural networks (PINNs) implemented in Pytorch Lightning.
 
 
+<summary><h2>Table of Contents</h2></summary>
+
+- [PINN examples with a software-engineering approach](#pinn-examples-with-a-software-engineering-approach)
+  - [Raissi's Burgers Equation (continuous-time)](#raissis-burgers-equation-continuous-time)
+  - [Moseley's Damped Harmonic Oscillator (continuous-time)](#moseleys-damped-harmonic-oscillator-continuous-time)
+  - [Heat Equation 1D (continuous-time)](#heat-equation-1d-continuous-time)
+  - [Raissi's Burgers Equation (discrete-time)](#raissis-burgers-equation-discrete-time)
+- [(Applied) Ressources for continuous-time and discrete-time PINNs](#applied-ressources-for-continuous-time-and-discrete-time-pinns)
+
+
+## Raissi's Burgers Equation (continuous-time)  
 The **first** example is Raissi's solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
 ```math
 \dfrac{d u}{d t} + u \dfrac{d u}{d x} = v \dfrac{d^2 u}{d x^2},
@@ -11,6 +21,8 @@ The aim is to train a neural network that can be used for inference. An implemen
 
 ![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/raissi_burgers/raissi_burgers.gif)  
 
+
+## Moseley's Damped Harmonic Oscillator (continuous-time)  
 The **second** example is Moseley's identification the friction coefficient of the [damped harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator):
 ```math
 m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0,
@@ -19,6 +31,8 @@ An implementation detail is that the time domain is added as a hyperparameter. I
 
 ![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png)  
 
+
+## Heat Equation 1D (continuous-time)  
 The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
 ```math
 m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma,
@@ -28,7 +42,15 @@ An implementation detail is the source term $\sigma$. The plot compares the anal
 ![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/heat_eq_1d/analytical_vs_pinn.png)  
 
 
-# Applied Ressources for continuous-time and discrete-time PINNs
+## Raissi's Burgers Equation (discrete-time) 
+The **fifth** example is Raissi's discrete-time solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
+This solves the PDE with only two time-snapshots at t0 and t1. The neural network outputs $q$ stages of the [Runge-Kutta](https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods) method, representing the time discretization. Raissi's paper reports an error of 0.007 [PINN Part I](https://arxiv.org/pdf/1711.10561.pdf). Here 0.0051 is achieved. Obviously, the training did not fully converge. The boundary conditions are not met.
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_burgers/t1_prediction.png)  
+
+The training exhibited a high volatility and LBFGS produced better predictions than Adam.
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/discrete_time/raissi_burgers/loss_plot.png)  
+
+# (Applied) Ressources for continuous-time and discrete-time PINNs
 
 **Maziar Raissi** (Brown University)  
 - https://github.com/maziarraissi/PINNs  
