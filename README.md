@@ -31,6 +31,7 @@ An implementation detail is that the time domain is added as a hyperparameter. I
 
 ![image](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png)  
 
+<img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png" width="400" height="250" />
 
 ## Heat Equation 1D (continuous-time)  
 The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
