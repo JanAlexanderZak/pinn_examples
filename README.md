@@ -16,7 +16,7 @@ This repository is a collection of continuous-time and discrete-time physics-inf
 ## Raissi's Burgers Equation (continuous-time)  
 The **first** example is Raissi's solution to [Burgers' Equation](https://en.wikipedia.org/wiki/Burgers%27_equation):
 ```math
-\dfrac{d u}{d t} + u \dfrac{d u}{d x} = v \dfrac{d^2 u}{d x^2},
+\dfrac{d u}{d t} + u \dfrac{d u}{d x} = v \dfrac{d^2 u}{d x^2}  \, .
 ```
 The aim is to train a neural network that can be used for inference. An implementation detail is that the time domain is added via a concatenated dataset. With increasing epochs from 500 to 20000, the solution gets approximated more accurately:  
 
@@ -26,7 +26,7 @@ The aim is to train a neural network that can be used for inference. An implemen
 ## Moseley's Damped Harmonic Oscillator (continuous-time)  
 The **second** example is Moseley's identification the friction coefficient of the [damped harmonic oscillator](https://en.wikipedia.org/wiki/Harmonic_oscillator):
 ```math
-m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0,
+m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0 \, .
 ```
 An implementation detail is that the time domain is added as a hyperparameter. In this case, the evolution of $\mu$ is of interest. The plot is not reproduced here.  
 
@@ -35,7 +35,7 @@ An implementation detail is that the time domain is added as a hyperparameter. I
 ## Heat Equation 1D (continuous-time)  
 The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
 ```math
-m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma,
+m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma \, .
 ```
 An implementation detail is the source term $\sigma$. The plot compares the analytical solution with the prediction of the PINN:  
 
@@ -45,7 +45,7 @@ An implementation detail is the source term $\sigma$. The plot compares the anal
 ## Heat Equation 2D (continuous-time)  
 The **fourth** example solves the two-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
 ```math
-m \dfrac{d u}{d t} = \alpha \left( \dfrac{d^2 u}{d x^2} + \dfrac{d^2 u}{d y^2} \right),
+m \dfrac{d u}{d t} = \alpha \left( \dfrac{d^2 u}{d x^2} + \dfrac{d^2 u}{d y^2} \right) \, .
 ```
 Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one vertex.
 
