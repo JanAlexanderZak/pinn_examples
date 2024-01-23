@@ -28,7 +28,7 @@ The **second** example is Moseley's identification the friction coefficient of t
 ```math
 m \dfrac{d^2 x}{d t^2} + \mu \dfrac{d x}{d t} + kx = 0 \, .
 ```
-An implementation detail is that the time domain is added as a hyperparameter. In this case, the evolution of $\mu$ is of interest. The plot is not reproduced here.  
+An implementation detail is that the time domain is added as a hyperparameter. In this case, the evolution of $\mu$ is of interest. The plot is not reproduced here, yet.  
 
 <img src="https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/moseley_oscillator/mu_plot.png" width="250" height="250" />
 
@@ -47,7 +47,9 @@ The **fourth** example solves the two-dimensional [heat equation](https://en.wik
 ```math
 m \dfrac{d u}{d t} = \alpha \left( \dfrac{d^2 u}{d x^2} + \dfrac{d^2 u}{d y^2} \right) \, .
 ```
-Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one vertex.
+Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one or more edges. The current example implements a boundary condition at the upper and left edge.
+
+![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/heat_eq_2d/heat_eq_2d_2BC.gif)  
 
 
 ## Raissi's Burgers Equation (discrete-time) 
