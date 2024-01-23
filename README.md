@@ -47,7 +47,7 @@ The **fourth** example solves the two-dimensional [heat equation](https://en.wik
 ```math
 m \dfrac{d u}{d t} = \alpha \left( \dfrac{d^2 u}{d x^2} + \dfrac{d^2 u}{d y^2} \right) \, .
 ```
-Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one or more edges. The current example implements a boundary condition at the upper and left edge.
+Here, no source term $\sigma$ is present. The neural network learns to solve a rectangular plate that is exposed to heat at one or more edges. The current example implements a boundary condition at the upper and left edge. With increasing time, the heat spreads across the plate:
 
 ![](https://github.com/JanAlexanderZak/pinn_examples/blob/main/src/continuous_time/heat_eq_2d/heat_eq_2d_2BC.gif)  
 
