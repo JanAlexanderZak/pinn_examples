@@ -35,7 +35,7 @@ An implementation detail is that the time domain is added as a hyperparameter. I
 ## Heat Equation 1D (continuous-time)  
 The **third** example solves the one-dimensional [heat equation](https://en.wikipedia.org/wiki/Heat_equation):
 ```math
-m \dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma \, .
+\dfrac{d u}{d t} = \alpha \dfrac{d^2 u}{d x^2} + \sigma \, .
 ```
 An implementation detail is the source term $\sigma$. The plot compares the analytical solution with the prediction of the PINN:  
 
@@ -80,6 +80,7 @@ The training exhibits a high volatility. Three examplatory models are shown in t
 - https://ora.ox.ac.uk/objects/uuid:b790477c-771f-4926-99c6-d2f9d248cb23
 - https://benmoseley.blog/my-research/so-what-is-a-physics-informed-neural-network/
 https://github.com/benmoseley/harmonic-oscillator-pinn
+- https://www.youtube.com/watch?v=GWjnFVIGwIg&list=PLJkYEExhe7rYY5HjpIJbgo-tDZ3bIAqAm&index=3
 
 **Prateek Bhustali** (TU Delft)  
 - https://github.com/omniscientoctopus/Physics-Informed-Neural-Networks
