@@ -174,7 +174,6 @@ class HeatEq2DPINNRegressor(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx) -> float:
         # * Part 1: Calculation
-        
         x_train_PDE = train_batch[0][0]
         x_train_BC, y_train_BC = train_batch[1]
         
@@ -230,11 +229,11 @@ class HeatEq2DPINNRegressor(pl.LightningModule):
         )[0]
 
         loss_PDE = self.pinn_losses.loss_function_PDE(
-            y_pred_PDE,
-            u_t,
-            u_xx,
-            u_yy,
-            self.hparams.alpha,
+            y_pred=y_pred_PDE,
+            u_t=u_t,
+            u_xx=u_xx,
+            u_yy=u_yy,
+            alpha=self.hparams.alpha,
         ) * self.hparams.loss_PDE_param
 
         loss = loss_PDE + loss_BC
