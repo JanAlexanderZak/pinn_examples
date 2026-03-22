@@ -7,6 +7,7 @@ import numpy as np
 from src.dl import DeepLearningArguments
 from src.raissi_burgers.model import  RaissiPINNRegressor
 from src.raissi_burgers.data_module import RaissiPINNDataModule
+from src.raissi_burgers.visualization import main as visualize
 
 
 def main(epochs):
@@ -103,6 +104,7 @@ def main(epochs):
         f"/data/predictions/predictions_{epochs}.pkl"
     )
     torch.save(u_pred, path)
+    visualize(epochs)
 
 if __name__ == "__main__":
     main(20500)

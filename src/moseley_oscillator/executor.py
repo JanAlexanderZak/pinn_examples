@@ -9,6 +9,7 @@ from src.moseley_oscillator.model import (
     MoseleyPINNRegressor,
 )
 from src.moseley_oscillator.data_module import MoseleyPINNDataModule
+from src.moseley_oscillator.visualization import main as visualize
 
 
 def main():
@@ -103,8 +104,7 @@ def main():
         train_dataloaders=train_loader,
         val_dataloaders=val_loader,
     )
-    #print(trainer.test(model=model, dataloaders=test_loader,))
-    #print(trainer.predict(dataloaders=test_loader,))
+    visualize(model, trainer.current_epoch)
 
 
 if __name__ == "__main__":

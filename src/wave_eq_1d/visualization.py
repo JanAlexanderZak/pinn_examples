@@ -7,7 +7,7 @@ from src.wave_eq_1d.generate_dataset import exact_solution
 from src.visualization import plot_heatmap_comparison
 
 
-def main(epoch):
+def main(epoch, save_dir="src/figures"):
     # Repeat dataset generation
     domain_length = 1.0
     x_resolution = 51
@@ -45,7 +45,7 @@ def main(epoch):
         x_label="t",
         y_label="x",
         field_label="u(x,t)",
-        save_path="src/wave_eq_1d/plots/analytical_solution_vs_pinn.png",
+        save_path=f"{save_dir}/wave_eq_1d_analytical_vs_pinn.png",
     )
 
 

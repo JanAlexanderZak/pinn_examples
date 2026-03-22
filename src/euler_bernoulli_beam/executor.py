@@ -12,6 +12,7 @@ from src.euler_bernoulli_beam.data_module import (
 from src.euler_bernoulli_beam.generate_dataset import (
     generate_dataset,
 )
+from src.euler_bernoulli_beam.visualization import visualize
 
 
 def main(epochs, load_case="cantilever_point_load"):
@@ -97,6 +98,7 @@ def main(epochs, load_case="cantilever_point_load"):
         w_pred,
         f"./src/euler_bernoulli_beam/data/predictions_{epochs}.pkl",
     )
+    visualize(model, load_case)
 
 
 if __name__ == "__main__":

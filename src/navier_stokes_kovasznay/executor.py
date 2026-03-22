@@ -10,6 +10,7 @@ from src.navier_stokes_kovasznay.data_module import (
     KovasznayPINNDataModule,
 )
 from src.navier_stokes_kovasznay.generate_dataset import generate_dataset
+from src.navier_stokes_kovasznay.visualization import main as visualize
 
 
 def main(epochs):
@@ -90,6 +91,7 @@ def main(epochs):
         uvp_pred,
         f"./src/navier_stokes_kovasznay/data/predictions/predictions_{epochs}.pkl",
     )
+    visualize(epochs)
 
 if __name__ == "__main__":
     main(15000)

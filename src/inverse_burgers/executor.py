@@ -13,6 +13,7 @@ from src.dl import DeepLearningArguments
 from src.inverse_burgers.model import InverseBurgersPINNRegressor
 from src.inverse_burgers.data_module import InverseBurgersPINNDataModule
 from src.inverse_burgers.generate_dataset import generate_dataset
+from src.inverse_burgers.visualization import main as visualize
 
 
 def main(epochs):
@@ -108,6 +109,7 @@ def main(epochs):
     torch.save(
         model.nus, f"{pred_dir}/nus_{epochs}.pkl",
     )
+    visualize(epochs)
 
 
 if __name__ == "__main__":

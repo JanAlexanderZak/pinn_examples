@@ -3,7 +3,7 @@ import torch
 from src.visualization import plot_line
 
 
-def visualize_solution(model, epoch):
+def main(model, epoch, save_dir="src/figures"):
     """Plot the PINN solution at a given training epoch."""
     t_test = torch.linspace(0, 1, 300).view(-1, 1)
     y_pred = model.forward(t_test).detach()
@@ -15,6 +15,6 @@ def visualize_solution(model, epoch):
         title=f"Training step {epoch}",
         xlabel="t",
         ylabel="x(t)",
-        save_path=f"src/moseley_oscillator/plots/solution_{epoch}.png",
+        save_path=f"{save_dir}/moseley_oscillator_solution.png",
         colors=["tab:green"],
     )

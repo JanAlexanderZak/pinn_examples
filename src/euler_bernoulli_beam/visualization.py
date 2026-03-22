@@ -45,7 +45,7 @@ def compute_beam_derivatives(model, x_np):
 def visualize(
     model,
     load_case="cantilever_point_load",
-    save_dir="src/euler_bernoulli_beam/plots",
+    save_dir="src/figures",
     L=1.0,
     EI=1.0,
     P=1.0,
@@ -75,7 +75,7 @@ def visualize(
         title=f"Deflection w(x) — {case_title}",
         xlabel="x",
         ylabel="w(x)",
-        save_path=f"{save_dir}/deflection_{load_case}.png",
+        save_path=f"{save_dir}/euler_bernoulli_beam_deflection_{load_case}.png",
         colors=["black", "tab:red"],
     )
 
@@ -87,7 +87,7 @@ def visualize(
         title=f"Bending Moment M(x) — {case_title}",
         xlabel="x",
         ylabel="M(x)",
-        save_path=f"{save_dir}/moment_{load_case}.png",
+        save_path=f"{save_dir}/euler_bernoulli_beam_moment_{load_case}.png",
         colors=["black", "tab:blue"],
     )
 
@@ -99,7 +99,7 @@ def visualize(
         title=f"Shear Force V(x) — {case_title}",
         xlabel="x",
         ylabel="V(x)",
-        save_path=f"{save_dir}/shear_{load_case}.png",
+        save_path=f"{save_dir}/euler_bernoulli_beam_shear_{load_case}.png",
         colors=["black", "tab:green"],
     )
 
@@ -112,7 +112,7 @@ def visualize(
         title=f"Absolute Error — {case_title}",
         xlabel="x",
         ylabel="|Error|",
-        save_path=f"{save_dir}/error_{load_case}.png",
+        save_path=f"{save_dir}/euler_bernoulli_beam_error_{load_case}.png",
         colors=["tab:orange"],
     )
 

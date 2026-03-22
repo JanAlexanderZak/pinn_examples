@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.py$|^d\")",
+      "Bash(grep -l \"training_step\\\\|validation_step\\\\|predict_step\\\\|on_epoch_end\" \"c:\\\\Users\\\\janal\\\\vscode_projects\\\\pinn_examples\\\\src\"/*/*.py)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(python -c \":*)"
+    ]
+  }
+}

@@ -6,10 +6,13 @@ import torch
 from src.dl import DeepLearningArguments
 from src.raissi_allen_cahn.model import RaissiPINNRegressor
 from src.raissi_allen_cahn.data_module import RaissiPINNDataModule
+from src.raissi_allen_cahn.generate_dataset import generate_dataset
+from src.raissi_allen_cahn.visualization import main as visualize
 
 
 def main(epochs):
     pl.seed_everything(6020)
+    generate_dataset()
     args = DeepLearningArguments(
         seed=6020,
         batch_size=64,
@@ -102,6 +105,13 @@ def main(epochs):
         f"_{hyper_parameters['size_hidden_layers']}.pkl"
     )
     torch.save(u_pred, pred_path)
+    pred_suffix = (
+        f"{hyper_parameters['learning_rate']}"
+        f"_{hyper_parameters['loss_IC_param']}"
+        f"_{hyper_parameters['num_hidden_layers']}"
+        f"_{hyper_parameters['size_hidden_layers']}"
+    )
+    visualize(pred_suffix)
 
 
 if __name__ == "__main__":

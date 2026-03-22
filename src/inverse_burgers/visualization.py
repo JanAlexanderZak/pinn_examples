@@ -7,7 +7,7 @@ from scipy.interpolate import griddata
 from src.visualization import plot_heatmap_comparison, plot_line
 
 
-def main(epoch):
+def main(epoch, save_dir="src/figures"):
     # Load reference data
     data = scipy.io.loadmat("src/raissi_burgers/data/burgers_shock.mat")
     t_domain = data["t"].flatten()
@@ -39,7 +39,7 @@ def main(epoch):
         x_label="t",
         y_label="x",
         field_label="u(x,t)",
-        save_path="src/inverse_burgers/plots/solution_comparison.png",
+        save_path=f"{save_dir}/inverse_burgers_solution_comparison.png",
     )
 
     # * Plot 2: nu convergence
@@ -53,7 +53,7 @@ def main(epoch):
         title="Viscosity Parameter Convergence",
         xlabel="Training Step",
         ylabel="nu",
-        save_path="src/inverse_burgers/plots/nu_convergence.png",
+        save_path=f"{save_dir}/inverse_burgers_nu_convergence.png",
         hlines=[(nu_true, f"True nu = {nu_true:.6f}", "red")],
     )
 

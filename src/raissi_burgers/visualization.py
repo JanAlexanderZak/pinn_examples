@@ -8,7 +8,7 @@ from scipy.interpolate import griddata
 from src.visualization import plot_single_heatmap
 
 
-def visualize(index, epoch: int = 20000):
+def main(epoch, save_dir="src/figures"):
 
     np.random.seed(6020)
 
@@ -75,7 +75,7 @@ def visualize(index, epoch: int = 20000):
         x_label="$t$",
         y_label="$x$",
         cbar_label="u",
-        save_path=f"src/raissi_burgers/plots/epochs/{epoch}.png",
+        save_path=f"{save_dir}/raissi_burgers_solution.png",
         scatter_data=(x_train_IC_BC[:, 1], x_train_IC_BC[:, 0]),
         scatter_kwargs={
             "marker": "x",
@@ -93,6 +93,4 @@ def visualize(index, epoch: int = 20000):
     )
 
 if __name__ == "__main__":
-
-    for index, epoch in enumerate(np.arange(500, 20500, 500)):
-        visualize(index, epoch)
+    main(20500)

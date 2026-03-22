@@ -1179,7 +1179,7 @@ wheels = [
 [[package]]
 name = "pinn-examples"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "h5py" },
     { name = "matplotlib" },

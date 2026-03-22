@@ -7,11 +7,25 @@ import numpy as np
 from src.dl import DeepLearningArguments
 from src.heat_eq_2d.model import HeatEq2DPINNRegressor
 from src.heat_eq_2d.data_module import HeatEq2DPINNDataModule
-from src.heat_eq_2d.generate_dataset import ALPHA
+from src.heat_eq_2d.generate_dataset import (
+    ALPHA, PLATE_LENGTH, MAX_ITER_TIME, generate_dataset,
+)
+from src.heat_eq_2d.visualization import main as visualize
 
 
 def main(epochs):
     pl.seed_everything(6020)
+    generate_dataset(
+        x_domain_lower_boundary=0,
+        x_domain_upper_boundary=PLATE_LENGTH,
+        x_domain_resolution=50,
+        y_domain_lower_boundary=0,
+        y_domain_upper_boundary=PLATE_LENGTH,
+        y_domain_resolution=50,
+        t_domain_lower_boundary=0,
+        t_domain_upper_boundary=MAX_ITER_TIME,
+        t_domain_resolution=50,
+    )
     args = DeepLearningArguments(
         seed=6020,
         batch_size=50,
@@ -104,6 +118,7 @@ def main(epochs):
         u_pred,
         f"./src/heat_eq_2d/data/predictions/predictions_{epochs}.pkl",
     )
+    visualize(epochs)
 
 
 if __name__ == "__main__":

@@ -7,10 +7,13 @@ import numpy as np
 from src.dl import DeepLearningArguments
 from src.heat_eq_1d.model import HeatEq1DPINNRegressor
 from src.heat_eq_1d.data_module import HeatEq1DPINNDataModule
+from src.heat_eq_1d.generate_dataset import generate_dataset
+from src.heat_eq_1d.visualization import main as visualize
 
 
 def main(epochs):
     pl.seed_everything(6020)
+    generate_dataset()
     args = DeepLearningArguments(
         seed=6020,
         batch_size=50,
@@ -104,6 +107,7 @@ def main(epochs):
         f"./src/heat_eq_1d/data/predictions/"
         f"predictions_{epochs}.pkl",
     )
+    visualize(epochs)
 
 if __name__ == "__main__":
     main(10000)

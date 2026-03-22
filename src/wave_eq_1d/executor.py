@@ -8,6 +8,7 @@ from src.dl import DeepLearningArguments
 from src.wave_eq_1d.model import WaveEq1DPINNRegressor
 from src.wave_eq_1d.data_module import WaveEq1DPINNDataModule
 from src.wave_eq_1d.generate_dataset import generate_dataset
+from src.wave_eq_1d.visualization import main as visualize
 
 
 def main(epochs):
@@ -88,6 +89,7 @@ def main(epochs):
         f"/data/predictions/predictions_{epochs}.pkl"
     )
     torch.save(u_pred, pred_path)
+    visualize(epochs)
 
 if __name__ == "__main__":
     main(20000)

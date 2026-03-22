@@ -7,7 +7,7 @@ from src.navier_stokes_kovasznay.generate_dataset import exact_solution
 from src.visualization import plot_heatmap_comparison
 
 
-def main(epoch):
+def main(epoch, save_dir="src/figures"):
     Re = 20.0
     nu = 1.0 / Re
 
@@ -47,7 +47,7 @@ def main(epoch):
             x_label="x",
             y_label="y",
             field_label=field_name,
-            save_path=f"src/navier_stokes_kovasznay/plots/{safe_name}_comparison.png",
+            save_path=f"{save_dir}/navier_stokes_kovasznay_{safe_name}_comparison.png",
             title=f"Kovasznay Flow - {field_name}",
         )
 
