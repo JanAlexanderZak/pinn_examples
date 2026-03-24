@@ -4,6 +4,7 @@ import scipy
 
 from scipy.interpolate import griddata
 
+from src.inverse_burgers.generate_dataset import L_REF
 from src.visualization import plot_heatmap_comparison, plot_line
 
 
@@ -16,8 +17,9 @@ def main(epoch, save_dir="src/figures"):
 
     X, T = np.meshgrid(x_domain, t_domain)
 
+    # x_test_grid uses scaled x (matching PINN input space) for griddata
     x_test_grid = np.hstack((
-        X.flatten().reshape(-1, 1),
+        X.flatten().reshape(-1, 1) / L_REF,
         T.flatten().reshape(-1, 1),
     ))
 
@@ -29,16 +31,17 @@ def main(epoch, save_dir="src/figures"):
         f"{pred_dir}/predictions_{epoch}.pkl",
     )
     u_pred_raw = torch.tensor(u_pred_raw).reshape(-1, 1)
-    u_pred = griddata(x_test_grid, u_pred_raw.flatten(), (X, T), method="cubic")
+    X_scaled = X / L_REF
+    u_pred = griddata(x_test_grid, u_pred_raw.flatten(), (X_scaled, T), method="cubic")
 
     plot_heatmap_comparison(
         exact=u_exact.T,
         pred=u_pred.T,
         x_coords=t_domain,
         y_coords=x_domain,
-        x_label="t",
-        y_label="x",
-        field_label="u(x,t)",
+        x_label=r"$t$ [-]",
+        y_label=r"$x$ [-]",
+        field_label=r"$u$ [-]",
         save_path=f"{save_dir}/inverse_burgers_solution_comparison.png",
     )
 
@@ -51,8 +54,8 @@ def main(epoch, save_dir="src/figures"):
         ys=[nus],
         labels=["Learned nu"],
         title="Viscosity Parameter Convergence",
-        xlabel="Training Step",
-        ylabel="nu",
+        xlabel=r"Training step [-]",
+        ylabel=r"$\nu$ [-]",
         save_path=f"{save_dir}/inverse_burgers_nu_convergence.png",
         hlines=[(nu_true, f"True nu = {nu_true:.6f}", "red")],
     )

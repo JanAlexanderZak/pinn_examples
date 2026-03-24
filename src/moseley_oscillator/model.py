@@ -4,11 +4,10 @@ PDE: m * x_tt + mu * x_t + k * x = 0
 Inverse problem: mu (friction coefficient) is learned as a torch.nn.Parameter.
 
 References:
-    Moseley, B., Markham, A., & Nissen-Meyer, T. (2023).
-        "Finite Basis Physics-Informed Neural Networks (FBPINNs): a scalable
-        domain decomposition approach for solving differential equations."
-        Advances in Computational Mathematics, 49, 62.
-        https://doi.org/10.1007/s10444-023-10065-9
+    Moseley, B. (2021).
+        "So, what is a physics-informed neural network?"
+        https://benmoseley.blog/my-research/so-what-is-a-physics-informed-neural-network/
+        https://github.com/benmoseley/harmonic-oscillator-pinn
 
     Raissi, M., Perdikaris, P., & Karniadakis, G.E. (2019).
         "Physics-informed neural networks: A deep learning framework for
@@ -47,7 +46,7 @@ class MoseleyPINNLosses:
         mu: torch.nn.parameter.Parameter,
         w0: int,
     ) -> torch.Tensor:
-        return torch.mean((u_xx + mu * u_x + w0 * y_pred) ** 2)
+        return torch.mean((u_xx + mu * u_x + w0 ** 2 * y_pred) ** 2)
 
 
 class MoseleyPINNRegressor(pl.LightningModule):
@@ -163,7 +162,6 @@ class MoseleyPINNRegressor(pl.LightningModule):
             optimizer=optimizer,
             mode="min",
             patience=self.hparams.scheduler_patience,
-            verbose=True,
         )
 
         return {
@@ -306,7 +304,7 @@ class MoseleyPINNRegressor(pl.LightningModule):
         self.mus.append(self.mu.item())
 
         if self.current_epoch == 10000:
-            from src.moseley_oscillator.visualization import visualize_solution
+            from src.moseley_oscillator.visualization import main as visualize_solution
             visualize_solution(self, self.current_epoch)
 
         return loss

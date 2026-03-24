@@ -6,7 +6,7 @@ Produces comparison plots of deflection, moment, and shear
 import numpy as np
 import torch
 
-from src.visualization import plot_line, pinn_style, save_figure, FIGSIZE_LINE_PLOT
+from src.visualization import plot_line, pinn_style, save_figure, FIGSIZE_LINE_PLOT, COLOR_EXACT, COLOR_PINN, COLOR_CYCLE
 from src.euler_bernoulli_beam.generate_dataset import exact_solution
 
 import matplotlib.pyplot as plt
@@ -60,10 +60,10 @@ def visualize(
         L, EI, P, q0: Physical parameters.
     """
     x = np.linspace(0, L, 201)
-    w_exact, theta_exact, M_exact, V_exact = exact_solution(
+    w_exact, theta_exact, M_exact, _ = exact_solution(
         x, load_case, L=L, EI=EI, P=P, q0=q0,
     )
-    w_pred, theta_pred, M_pred, V_pred = compute_beam_derivatives(model, x)
+    w_pred, theta_pred, M_pred, _ = compute_beam_derivatives(model, x)
 
     case_title = load_case.replace("_", " ").title()
 
@@ -72,11 +72,11 @@ def visualize(
         x=x,
         ys=[w_exact, w_pred],
         labels=["Exact", "PINN"],
-        title=f"Deflection w(x) — {case_title}",
-        xlabel="x",
-        ylabel="w(x)",
+        title=f"Deflection — {case_title}",
+        xlabel=r"$x$ [-]",
+        ylabel=r"$w$ [-]",
         save_path=f"{save_dir}/euler_bernoulli_beam_deflection_{load_case}.png",
-        colors=["black", "tab:red"],
+        colors=[COLOR_EXACT, COLOR_PINN],
     )
 
     # 2. Bending moment
@@ -84,36 +84,24 @@ def visualize(
         x=x,
         ys=[M_exact, M_pred],
         labels=["Exact", "PINN"],
-        title=f"Bending Moment M(x) — {case_title}",
-        xlabel="x",
-        ylabel="M(x)",
+        title=f"Bending Moment — {case_title}",
+        xlabel=r"$x$ [-]",
+        ylabel=r"$M$ [-]",
         save_path=f"{save_dir}/euler_bernoulli_beam_moment_{load_case}.png",
-        colors=["black", "tab:blue"],
+        colors=[COLOR_EXACT, COLOR_CYCLE[0]],
     )
 
-    # 3. Shear force
-    plot_line(
-        x=x,
-        ys=[V_exact, V_pred],
-        labels=["Exact", "PINN"],
-        title=f"Shear Force V(x) — {case_title}",
-        xlabel="x",
-        ylabel="V(x)",
-        save_path=f"{save_dir}/euler_bernoulli_beam_shear_{load_case}.png",
-        colors=["black", "tab:green"],
-    )
-
-    # 4. Absolute error
+    # 3. Absolute error
     abs_error = np.abs(w_exact - w_pred)
     plot_line(
         x=x,
         ys=[abs_error],
-        labels=["|w_exact - w_pred|"],
+        labels=[r"$|w_\mathrm{exact} - w_\mathrm{pred}|$"],
         title=f"Absolute Error — {case_title}",
-        xlabel="x",
-        ylabel="|Error|",
+        xlabel=r"$x$ [-]",
+        ylabel=r"$|\Delta w|$ [-]",
         save_path=f"{save_dir}/euler_bernoulli_beam_error_{load_case}.png",
-        colors=["tab:orange"],
+        colors=[COLOR_CYCLE[2]],
     )
 
     # Print verification metrics
@@ -134,3 +122,48 @@ def visualize(
     print(f"  M(L)      = {ML[0]:.6e}")
     print(f"  V(L)      = {VL[0]:.6e}")
     print(f"{'='*50}\n")
+
+
+def main(epoch, load_case="cantilever_point_load", save_dir="src/figures"):
+    """Generate beam plots from saved data files (no trained model needed)."""
+    data_dir = f"./src/euler_bernoulli_beam/data/{load_case}"
+
+    x = np.load(f"{data_dir}/x_star.npy").flatten()
+    w_exact = np.load(f"{data_dir}/w_exact.npy")
+    M_exact = np.load(f"{data_dir}/M_exact.npy")
+
+
+    w_pred_raw = torch.load(f"{data_dir}/predictions_{epoch}.pkl")
+    w_pred = torch.cat(w_pred_raw, dim=0).numpy().flatten()
+
+    case_title = load_case.replace("_", " ").title()
+
+    # 1. Deflection
+    plot_line(
+        x=x,
+        ys=[w_exact, w_pred],
+        labels=["Exact", "PINN"],
+        title=f"Deflection — {case_title}",
+        xlabel=r"$x$ [-]",
+        ylabel=r"$w$ [-]",
+        save_path=f"{save_dir}/euler_bernoulli_beam_deflection_{load_case}.png",
+        colors=[COLOR_EXACT, COLOR_PINN],
+    )
+
+    # 2. Absolute error
+    abs_error = np.abs(w_exact - w_pred)
+    plot_line(
+        x=x,
+        ys=[abs_error],
+        labels=[r"$|w_\mathrm{exact} - w_\mathrm{pred}|$"],
+        title=f"Absolute Error — {case_title}",
+        xlabel=r"$x$ [-]",
+        ylabel=r"$|\Delta w|$ [-]",
+        save_path=f"{save_dir}/euler_bernoulli_beam_error_{load_case}.png",
+        colors=[COLOR_CYCLE[2]],
+    )
+
+
+if __name__ == "__main__":
+    for case in ["cantilever_point_load", "simply_supported_udl", "cantilever_udl"]:
+        main(15000, load_case=case)

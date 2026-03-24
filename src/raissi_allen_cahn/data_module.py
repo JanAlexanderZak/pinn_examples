@@ -68,6 +68,7 @@ class RaissiPINNDataModule(pl.LightningDataModule):
         self.target_names = None
         self.in_features = None
         self.out_features = None
+        self.dt = None
 
     @staticmethod
     def load_data(path_to_data):
@@ -76,6 +77,7 @@ class RaissiPINNDataModule(pl.LightningDataModule):
             np.load(os.path.join(path_to_data, "y_train_IC.npy")),
             np.load(os.path.join(path_to_data, "x_train_BC.npy")),
             np.load(os.path.join(path_to_data, "x_star.npy")),
+            np.load(os.path.join(path_to_data, "dt.npy")),
         )
 
     def prepare_data(self) -> None:
@@ -84,7 +86,7 @@ class RaissiPINNDataModule(pl.LightningDataModule):
 
     def setup(self) -> None:
         # Load, create dataset
-        x_train_IC, y_train_IC, x_train_BC, x_star = (
+        x_train_IC, y_train_IC, x_train_BC, x_star, dt = (
             self.load_data(self.hparams.path_to_data)
         )
 
@@ -92,6 +94,7 @@ class RaissiPINNDataModule(pl.LightningDataModule):
         self.target_names = list(["y"])
         self.in_features = x_train_IC.shape[1]
         self.out_features = 100 + 1
+        self.dt = float(dt)
 
         self.dataset_train_IC = torch.utils.data.TensorDataset(
             torch.Tensor(x_train_IC),

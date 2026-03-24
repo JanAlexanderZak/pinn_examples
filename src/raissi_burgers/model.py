@@ -42,8 +42,11 @@ class RaissiPINNLosses:
         u_x: torch.Tensor,
         u_xx: torch.Tensor,
         nu: float,
+        L_ref: float,
     ) -> torch.Tensor:
-        return torch.mean((u_t + y_pred * u_x - nu * u_xx) ** 2)
+        return torch.mean((
+            u_t + y_pred * u_x / L_ref - nu * u_xx / L_ref ** 2
+        ) ** 2)
 
 
 class RaissiPINNRegressor(pl.LightningModule):
@@ -153,7 +156,6 @@ class RaissiPINNRegressor(pl.LightningModule):
             optimizer=optimizer,
             mode="min",
             patience=self.hparams.scheduler_patience,
-            verbose=True,
         )
 
         return {
@@ -250,6 +252,7 @@ class RaissiPINNRegressor(pl.LightningModule):
             u_x,
             u_xx,
             nu=self.hparams.nu,
+            L_ref=self.hparams.L_ref,
         ) * self.hparams.loss_PDE_param
 
         loss = loss_PDE + loss_IC_BC
@@ -326,7 +329,8 @@ class RaissiPINNRegressor(pl.LightningModule):
             retain_graph=True, create_graph=True,
         )[0]
 
-        residual = u_t + u * u_x - self.hparams.nu * u_xx
+        L_ref = self.hparams.L_ref
+        residual = u_t + u * u_x / L_ref - self.hparams.nu * u_xx / L_ref ** 2
         return torch.abs(residual).squeeze()
 
     def predict_step(self, pred_batch, batch_idx) -> torch.Tensor:

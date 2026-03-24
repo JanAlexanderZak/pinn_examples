@@ -2,6 +2,10 @@
 
 Learns the viscosity parameter nu from sparse noisy observations.
 True value: nu = 0.01/pi ≈ 0.003183
+
+Two-stage optimization following Raissi et al. (2019):
+  1. Adam optimizer for warm-up (mini-batch)
+  2. L-BFGS-B for refinement (full-batch)
 """
 import os
 
@@ -12,7 +16,7 @@ import numpy as np
 from src.dl import DeepLearningArguments
 from src.inverse_burgers.model import InverseBurgersPINNRegressor
 from src.inverse_burgers.data_module import InverseBurgersPINNDataModule
-from src.inverse_burgers.generate_dataset import generate_dataset
+from src.inverse_burgers.generate_dataset import generate_dataset, L_REF, NU_SCALE
 from src.inverse_burgers.visualization import main as visualize
 
 
@@ -50,11 +54,12 @@ def main(epochs):
         "batch_normalization": False,
         "nu_initial": 0.1,  # Initial guess (far from true value 0.01/pi)
         "nu_true": 0.01 / np.pi,  # For reference only
+        "L_ref": L_REF,
+        "nu_scale": NU_SCALE,
     }
 
     path_to_data = "./src/inverse_burgers/data/"
-    if not os.path.exists(os.path.join(path_to_data, "x_train_IC_BC.npy")):
-        generate_dataset(path_to_data)
+    generate_dataset(path_to_data)
 
     data_module = InverseBurgersPINNDataModule(
         path_to_data=path_to_data,
@@ -94,15 +99,65 @@ def main(epochs):
         train_dataloaders=train_loader,
     )
 
-    print(f"\nTrue nu:      {0.01/np.pi:.6f}")
-    print(f"Learned nu:   {model.nu.item():.6f}")
-    rel_err = abs(model.nu.item() - 0.01/np.pi) / (0.01/np.pi) * 100
-    print(f"Relative err: {rel_err:.2f}%")
+    nu_val = torch.exp(model.log_nu).item() * NU_SCALE
+    print(f"\nAfter Adam:")
+    print(f"  True nu:      {0.01/np.pi:.6f}")
+    print(f"  Learned nu:   {nu_val:.6f}")
+    rel_err = abs(nu_val - 0.01/np.pi) / (0.01/np.pi) * 100
+    print(f"  Relative err: {rel_err:.2f}%")
+
+    # L-BFGS refinement (full-batch, following Raissi's two-stage approach)
+    print("\nStarting L-BFGS refinement...")
+    x_train_all = torch.Tensor(np.load(os.path.join(path_to_data, "x_train.npy")))
+    x_IC_BC = torch.Tensor(np.load(os.path.join(path_to_data, "x_train_IC_BC.npy")))
+    y_IC_BC = torch.Tensor(np.load(os.path.join(path_to_data, "y_train_IC_BC.npy")))
+    x_obs_all = torch.Tensor(np.load(os.path.join(path_to_data, "x_obs.npy")))
+    u_obs_all = torch.Tensor(np.load(os.path.join(path_to_data, "u_obs.npy")))
+
+    lbfgs_optimizer = torch.optim.LBFGS(
+        list(model.parameters()),
+        lr=1.0,
+        max_iter=50,
+        max_eval=50,
+        tolerance_grad=1e-7,
+        tolerance_change=1e-9,
+        history_size=50,
+        line_search_fn="strong_wolfe",
+    )
+
+    n_lbfgs_steps = 200
+    model.train()
+    for step in range(n_lbfgs_steps):
+        def closure():
+            lbfgs_optimizer.zero_grad()
+            loss = model.compute_full_loss(
+                x_train_all, x_IC_BC, y_IC_BC, x_obs_all, u_obs_all,
+            )
+            loss.backward()
+            return loss
+
+        loss = lbfgs_optimizer.step(closure)
+        model.nus.append(torch.exp(model.log_nu).item() * NU_SCALE)
+
+        if step % 10 == 0:
+            nu_val = torch.exp(model.log_nu).item() * NU_SCALE
+            print(
+                f"  L-BFGS step {step}, Loss: {loss.item():.5e},"
+                f" nu: {nu_val:.6f}"
+            )
+
+    nu_val = torch.exp(model.log_nu).item() * NU_SCALE
+    print(f"\nAfter L-BFGS:")
+    print(f"  True nu:      {0.01/np.pi:.6f}")
+    print(f"  Learned nu:   {nu_val:.6f}")
+    rel_err = abs(nu_val - 0.01/np.pi) / (0.01/np.pi) * 100
+    print(f"  Relative err: {rel_err:.2f}%")
 
     u_pred = trainer.predict(model, dataloaders=test_loader)
     print(len(u_pred))
 
     pred_dir = "./src/inverse_burgers/data/predictions"
+    os.makedirs(pred_dir, exist_ok=True)
     torch.save(
         u_pred, f"{pred_dir}/predictions_{epochs}.pkl",
     )

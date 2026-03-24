@@ -1,12 +1,15 @@
 """ Executable example of Raissi's Burger's equation in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 import numpy as np
 
 from src.dl import DeepLearningArguments
-from src.raissi_burgers.model import  RaissiPINNRegressor
+from src.raissi_burgers.model import RaissiPINNRegressor
 from src.raissi_burgers.data_module import RaissiPINNDataModule
+from src.raissi_burgers.generate_dataset import L_REF
 from src.raissi_burgers.visualization import main as visualize
 
 
@@ -43,6 +46,7 @@ def main(epochs):
         "dropout_p": 0.1,
         "batch_normalization": False,
         "nu": 0.01/np.pi,
+        "L_ref": L_REF,
     }
 
     data_module = RaissiPINNDataModule(
@@ -99,11 +103,9 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))
-    path = (
-        "./src/raissi_burgers"
-        f"/data/predictions/predictions_{epochs}.pkl"
-    )
-    torch.save(u_pred, path)
+    predictions_dir = "./src/raissi_burgers/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
+    torch.save(u_pred, f"{predictions_dir}/predictions_{epochs}.pkl")
     visualize(epochs)
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """ PINN for the 2D heat equation (continuous-time).
 
-PDE: m * u_t = alpha * (u_xx + u_yy)
+PDE: u_t = alpha * (u_xx + u_yy)
 
 References:
     Raissi, M., Perdikaris, P., & Karniadakis, G.E. (2019).
@@ -42,7 +42,6 @@ class HeatEq2DPINNLosses:
         u_yy: torch.Tensor,
         alpha: float,
     ) -> torch.Tensor:
-        # source: 2.0 * np.sin(np.pi * x)
         return torch.mean((alpha * (u_xx + u_yy) - u_t) ** 2)
 
 
@@ -152,7 +151,6 @@ class HeatEq2DPINNRegressor(pl.LightningModule):
             optimizer=optimizer,
             mode="min",
             patience=self.hparams.scheduler_patience,
-            verbose=True,
         )
 
         return {

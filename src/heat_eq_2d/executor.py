@@ -1,5 +1,7 @@
 """ Executable example of 2D heat equation in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 import numpy as np
@@ -8,7 +10,7 @@ from src.dl import DeepLearningArguments
 from src.heat_eq_2d.model import HeatEq2DPINNRegressor
 from src.heat_eq_2d.data_module import HeatEq2DPINNDataModule
 from src.heat_eq_2d.generate_dataset import (
-    ALPHA, PLATE_LENGTH, MAX_ITER_TIME, generate_dataset,
+    ALPHA, PLATE_LENGTH, MAX_ITER_TIME, DOMAIN_LENGTH, U_REF, generate_dataset,
 )
 from src.heat_eq_2d.visualization import main as visualize
 
@@ -17,14 +19,12 @@ def main(epochs):
     pl.seed_everything(6020)
     generate_dataset(
         x_domain_lower_boundary=0,
-        x_domain_upper_boundary=PLATE_LENGTH,
-        x_domain_resolution=50,
+        x_domain_upper_boundary=DOMAIN_LENGTH,
+        x_domain_resolution=PLATE_LENGTH,
         y_domain_lower_boundary=0,
-        y_domain_upper_boundary=PLATE_LENGTH,
-        y_domain_resolution=50,
-        t_domain_lower_boundary=0,
-        t_domain_upper_boundary=MAX_ITER_TIME,
-        t_domain_resolution=50,
+        y_domain_upper_boundary=DOMAIN_LENGTH,
+        y_domain_resolution=PLATE_LENGTH,
+        t_domain_resolution=MAX_ITER_TIME,
     )
     args = DeepLearningArguments(
         seed=6020,
@@ -38,6 +38,13 @@ def main(epochs):
         pin_memory=True,
         persistent_workers=True,
     )
+
+    # Compute non-dimensional alpha: alpha_nd = alpha * T_ref / L_ref^2
+    scaling = np.load(
+        "./src/heat_eq_2d/data/scaling.npy", allow_pickle=True
+    ).item()
+    T_ref = scaling["T_ref"]
+    alpha_nd = ALPHA * T_ref / DOMAIN_LENGTH ** 2
 
     hyper_parameters = {
         "activation_function": torch.nn.Tanh,
@@ -55,7 +62,9 @@ def main(epochs):
         "dropout": False,
         "dropout_p": 0.1,
         "batch_normalization": False,
-        "alpha": ALPHA,
+        "alpha": alpha_nd,
+        "U_ref": U_REF,
+        "T_ref": T_ref,
     }
 
     data_module = HeatEq2DPINNDataModule(
@@ -114,9 +123,11 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))
+    predictions_dir = "./src/heat_eq_2d/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
     torch.save(
         u_pred,
-        f"./src/heat_eq_2d/data/predictions/predictions_{epochs}.pkl",
+        f"{predictions_dir}/predictions_{epochs}.pkl",
     )
     visualize(epochs)
 

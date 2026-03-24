@@ -20,6 +20,10 @@ FONT_FAMILY = "serif"
 
 DPI_SAVE = 300
 
+COLOR_EXACT = "black"
+COLOR_PINN = "#d62728"  # tab:red
+COLOR_CYCLE = ["#1f77b4", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b"]
+
 FIGSIZE_HEATMAP_COMPARISON = (8, 10)
 FIGSIZE_SINGLE_HEATMAP = (9, 5)
 FIGSIZE_LINE_PLOT = (7, 4)
@@ -40,6 +44,17 @@ def pinn_style():
         "savefig.dpi": DPI_SAVE,
         "savefig.bbox": "tight",
         "axes.grid": False,
+        "mathtext.fontset": "cm",
+        "xtick.top": True,
+        "ytick.right": True,
+        "xtick.direction": "in",
+        "ytick.direction": "in",
+        "xtick.minor.visible": True,
+        "ytick.minor.visible": True,
+        "xtick.major.size": 5,
+        "ytick.major.size": 5,
+        "xtick.minor.size": 3,
+        "ytick.minor.size": 3,
     })
     try:
         yield
@@ -112,7 +127,8 @@ def plot_heatmap_comparison(
             cax = divider.append_axes("right", size="5%", pad=0.10)
             cbar = fig.colorbar(im, cax=cax)
             cbar.set_label(field_label)
-            ax.set_ylabel(f"{y_label} ({subtitle})")
+            ax.set_ylabel(y_label)
+            ax.set_title(subtitle, fontsize=FONT_SIZE_LABEL, loc="left")
 
         # Only show x-axis label/ticks on bottom subplot
         for ax in axes[:-1]:
@@ -164,7 +180,8 @@ def plot_single_heatmap(
         )
         divider = make_axes_locatable(ax)
         cax = divider.append_axes("right", size="5%", pad=0.10)
-        fig.colorbar(im, cax=cax)
+        cbar = fig.colorbar(im, cax=cax)
+        cbar.set_label(cbar_label)
 
         if scatter_data is not None:
             kwargs = scatter_kwargs or {}

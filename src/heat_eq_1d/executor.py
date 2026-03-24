@@ -1,5 +1,7 @@
 """ Executable example of 1D heat equation in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 import numpy as np
@@ -7,7 +9,7 @@ import numpy as np
 from src.dl import DeepLearningArguments
 from src.heat_eq_1d.model import HeatEq1DPINNRegressor
 from src.heat_eq_1d.data_module import HeatEq1DPINNDataModule
-from src.heat_eq_1d.generate_dataset import generate_dataset
+from src.heat_eq_1d.generate_dataset import generate_dataset, T_REF, U_REF
 from src.heat_eq_1d.visualization import main as visualize
 
 
@@ -43,7 +45,10 @@ def main(epochs):
         "dropout": False,
         "dropout_p": 0.1,
         "batch_normalization": False,
-        "alpha": 0.1,
+        "alpha": 0.1 * T_REF,  # alpha_nd = alpha * T_ref / L_ref^2 = 0.5
+        "source_coeff": 2.0 * T_REF / U_REF,  # source_nd = 2 * T_ref / U_ref = 5.0
+        "T_ref": T_REF,
+        "U_ref": U_REF,
     }
 
     data_module = HeatEq1DPINNDataModule(
@@ -102,10 +107,11 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))
+    predictions_dir = "./src/heat_eq_1d/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
     torch.save(
         u_pred,
-        f"./src/heat_eq_1d/data/predictions/"
-        f"predictions_{epochs}.pkl",
+        f"{predictions_dir}/predictions_{epochs}.pkl",
     )
     visualize(epochs)
 

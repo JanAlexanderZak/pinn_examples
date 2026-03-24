@@ -42,13 +42,13 @@ class HeatEq1DPINNLosses:
         u_t: torch.Tensor,
         u_xx: torch.Tensor,
         alpha: float,
+        source_coeff: float,
         x_domain: torch.Tensor,
     ) -> torch.Tensor:
-        # source: 2.0 * np.sin(np.pi * x)
         return torch.mean(
             (
                 alpha * u_xx
-                + 2.0 * torch.sin(torch.pi * x_domain)
+                + source_coeff * torch.sin(torch.pi * x_domain)
                 - u_t
             ) ** 2
         )
@@ -161,7 +161,6 @@ class HeatEq1DPINNRegressor(pl.LightningModule):
             optimizer=optimizer,
             mode="min",
             patience=self.hparams.scheduler_patience,
-            verbose=True,
         )
 
         return {
@@ -257,6 +256,7 @@ class HeatEq1DPINNRegressor(pl.LightningModule):
             u_t,
             u_xx,
             self.hparams.alpha,
+            self.hparams.source_coeff,
             x_pde_x,
         ) * self.hparams.loss_PDE_param
 

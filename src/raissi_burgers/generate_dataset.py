@@ -17,6 +17,8 @@ import scipy
 
 from pyDOE import lhs
 
+L_REF = 8.0  # Reference length for non-dimensionalization (half-domain width)
+
 
 def generate_dataset(path: str = "./src/raissi_burgers/data/",):
     n_bc_points = 100
@@ -58,6 +60,11 @@ def generate_dataset(path: str = "./src/raissi_burgers/data/",):
     )
     x_train = np.vstack((x_train, all_x_train_IC_BC))  # (10000+456=10456, 2)
 
+    # * Non-dimensionalization: scale x to [-1, 1]
+    all_x_train_IC_BC[:, 0] /= L_REF
+    x_train[:, 0] /= L_REF
+    x_star[:, 0] /= L_REF
+
     # * Final data
     idx = np.random.choice(all_x_train_IC_BC.shape[0], n_bc_points, replace=False)
     x_train_IC_BC = all_x_train_IC_BC[idx, :]   # (100, 2)
@@ -68,6 +75,7 @@ def generate_dataset(path: str = "./src/raissi_burgers/data/",):
     np.save(os.path.join(path, "y_train_IC_BC"), y_train_IC_BC)
     np.save(os.path.join(path, "x_train"), x_train)
     np.save(os.path.join(path, "x_star"), x_star)
+    np.save(os.path.join(path, "scaling"), {"L_ref": L_REF})
 
 if __name__ == "__main__":
     generate_dataset()

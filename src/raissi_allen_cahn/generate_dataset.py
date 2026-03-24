@@ -21,6 +21,8 @@ def generate_dataset(path: str = "src/raissi_allen_cahn/data",):
     idx_t1 = 180
     dt = t_domain[idx_t1] - t_domain[idx_t0]
 
+    np.save(os.path.join(path, "dt"), dt)
+
     # Initial data, former x0, u0
     noise_u0 = 0.0
     idx_x = np.random.choice(y_train.shape[1], n_ic_points, replace=False)

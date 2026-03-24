@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 from pyDOE import lhs
 
 
-PLATE_LENGTH = 50
-MAX_ITER_TIME = 50
-ALPHA = 2
+PLATE_LENGTH = 50      # Number of spatial grid points
+MAX_ITER_TIME = 50     # Number of FDM time iterations
+ALPHA = 2              # Thermal diffusivity
+DOMAIN_LENGTH = 1.0    # Physical spatial domain size [0, DOMAIN_LENGTH]
+U_REF = 100.0          # Reference scale for non-dimensionalization (max BC value)
 
 
 def generate_dataset(
@@ -20,8 +22,6 @@ def generate_dataset(
     y_domain_lower_boundary: float,
     y_domain_upper_boundary: float,
     y_domain_resolution: int,
-    t_domain_lower_boundary: float,
-    t_domain_upper_boundary: float,
     t_domain_resolution: int,
     sanity_check: bool = False,
     priority_of_IC: bool = False,
@@ -44,8 +44,13 @@ def generate_dataset(
         y_exclusion_start = 0
         y_exclusion_end = None
 
-    # FDM solution
-    y_train = fdm_solution(x_domain_upper_boundary, t_domain_upper_boundary, ALPHA)
+    # FDM solution — time domain is derived from FDM discretization
+    y_train, t_physical = fdm_solution(
+        n_points=x_domain_resolution,
+        n_time_steps=MAX_ITER_TIME,
+        alpha=ALPHA,
+        domain_length=x_domain_upper_boundary,
+    )
 
     # Preprocessing
     x_domain = np.linspace(
@@ -54,9 +59,7 @@ def generate_dataset(
     y_domain = np.linspace(
         y_domain_lower_boundary, y_domain_upper_boundary, y_domain_resolution
     )
-    t_domain = np.linspace(
-        t_domain_lower_boundary, t_domain_upper_boundary, t_domain_resolution
-    )
+    t_domain = np.linspace(0, t_physical, t_domain_resolution)
 
     X, Y, T = np.meshgrid(x_domain, y_domain, t_domain, indexing="ij")
 
@@ -154,6 +157,14 @@ def generate_dataset(
     )
     x_train = np.vstack((x_train, all_x_train_IC_BC))
 
+    # * Non-dimensionalization
+    # Scale time to [0, 1] and outputs to O(1)
+    T_ref = t_physical
+    all_x_train_IC_BC[:, 2] /= T_ref
+    all_y_train_IC_BC /= U_REF
+    x_train[:, 2] /= T_ref
+    x_star[:, 2] /= T_ref
+
     # * Final data
     n_bc_points = 5000
     idx = np.random.choice(all_x_train_IC_BC.shape[0], n_bc_points, replace=False)
@@ -164,6 +175,9 @@ def generate_dataset(
     np.save(os.path.join(path, "y_train_IC_BC"), y_train_IC_BC)
     np.save(os.path.join(path, "x_train"), x_train)
     np.save(os.path.join(path, "x_star"), x_star)
+    np.save(os.path.join(path, "scaling"), {
+        "T_ref": T_ref, "U_ref": U_REF, "L_ref": 1.0,
+    })
 
 
 def plotheatmap(u_k, k, delta_t):
@@ -182,48 +196,55 @@ def plotheatmap(u_k, k, delta_t):
 
 
 def fdm_solution(
-    plate_length: int,
-    max_iter_time: int,
+    n_points: int,
+    n_time_steps: int,
     alpha: float,
+    domain_length: float = 1.0,
     path: str = "src/heat_eq_2d/data",
-) -> np.ndarray:
-    """
+) -> tuple:
+    """Solves the 2D heat equation u_t = alpha*(u_xx + u_yy) using explicit
+    FTCS (Forward Time, Central Space) finite difference method.
+
+    The FDM grid uses integer indices internally. The physical coordinate
+    mapping is: x_physical = i * delta_x, where delta_x = domain_length / (n_points - 1).
+    The stability parameter gamma = alpha * delta_t / delta_x^2 = 0.25
+    (at the stability boundary for 2D explicit schemes).
+
+    Returns:
+        (y_train, t_physical): Solution array of shape (n_time_steps, n_points, n_points)
+            and the physical time corresponding to the last time step.
+
     Reference:
     https://levelup.gitconnected.com/solving-2d-heat-equation-numerically-using-python-3334004aa01a
     (Universitas Padjadjaran)
     """
-    delta_x = 1
-
-    delta_t = (delta_x ** 2)/(4 * alpha)
+    delta_x = domain_length / (n_points - 1)
+    delta_t = (delta_x ** 2) / (4 * alpha)
     gamma = (alpha * delta_t) / (delta_x ** 2)
 
     # Initialize solution: the grid of u(k, i, j)
-    u = np.empty((max_iter_time, plate_length, plate_length))
-
-    # Initial condition everywhere inside the grid
-    u_initial = 0
-    u.fill(u_initial)
+    u = np.empty((n_time_steps, n_points, n_points))
+    u.fill(0)
 
     # Boundary conditions
     # Convention: u[k, i, j] where i indexes x-axis, j indexes y-axis
-    # Must match PINN BCs in generate_dataset():
-    # left(x=0)=100, right(x=max)=0, lower(y=0)=0, upper(y=max)=100
+    # Must match PINN BCs in generate_dataset().
+    # Note: bottom/top BCs are applied after left/right, so at corners
+    # where two boundaries meet, bottom/top values take priority.
     u_left = 100.0    # x = 0 (i = 0)
-    u_right = 0.0     # x = max (i = plate_length - 1)
+    u_right = 0.0     # x = max (i = n_points - 1)
     u_bottom = 0.0    # y = 0 (j = 0)
-    u_top = 100.0      # y = max (j = plate_length - 1)
+    u_top = 100.0     # y = max (j = n_points - 1)
 
-    # Set the boundary conditions
-    u[:, :1, :] = u_left                       # i = 0 (x = 0)
-    u[:, (plate_length - 1):, :] = u_right     # i = max (x = max)
-    u[:, :, :1] = u_bottom                     # j = 0 (y = 0)
-    u[:, :, (plate_length - 1):] = u_top       # j = max (y = max)
+    u[:, :1, :] = u_left
+    u[:, (n_points - 1):, :] = u_right
+    u[:, :, :1] = u_bottom
+    u[:, :, (n_points - 1):] = u_top
 
-    # todo: clean-up
     def calculate(u):
-        for k in range(0, max_iter_time - 1, 1):
-            for i in range(1, plate_length - 1, delta_x):
-                for j in range(1, plate_length - 1, delta_x):
+        for k in range(0, n_time_steps - 1):
+            for i in range(1, n_points - 1):
+                for j in range(1, n_points - 1):
                     u[k + 1, i, j] = gamma * (
                         u[k][i + 1][j]
                         + u[k][i - 1][j]
@@ -231,44 +252,22 @@ def fdm_solution(
                         + u[k][i][j - 1]
                         - 4 * u[k][i][j]
                     ) + u[k][i][j]
-
         return u
 
     y_train = calculate(u)
-
     np.save(os.path.join(path, "y_train"), y_train)
 
-    # Visual sanity check
-    #def animate(k):
-    #    plotheatmap(u[k], k, delta_t)
-
-    #anim = animation.FuncAnimation(
-    #    plt.figure(),
-    #    animate,
-    #    interval=1,
-    #    frames=max_iter_time,
-    #    repeat=False,
-    #)
-    #anim.save("src/heat_eq_2d/heat_equation_solution.gif")
-
-    return y_train
+    t_physical = (n_time_steps - 1) * delta_t
+    return y_train, t_physical
 
 
 if __name__ == "__main__":
     generate_dataset(
         x_domain_lower_boundary=0,
-        x_domain_upper_boundary=PLATE_LENGTH,
-        x_domain_resolution=50,
+        x_domain_upper_boundary=DOMAIN_LENGTH,
+        x_domain_resolution=PLATE_LENGTH,
         y_domain_lower_boundary=0,
-        y_domain_upper_boundary=PLATE_LENGTH,
-        y_domain_resolution=50,
-        t_domain_lower_boundary=0,
-        t_domain_upper_boundary=MAX_ITER_TIME,
-        t_domain_resolution=50,
-    )
-
-    fdm_solution(
-        plate_length=PLATE_LENGTH,
-        max_iter_time=MAX_ITER_TIME,
-        alpha=ALPHA,
+        y_domain_upper_boundary=DOMAIN_LENGTH,
+        y_domain_resolution=PLATE_LENGTH,
+        t_domain_resolution=MAX_ITER_TIME,
     )

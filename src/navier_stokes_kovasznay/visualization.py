@@ -3,7 +3,7 @@ import numpy as np
 
 from scipy.interpolate import griddata
 
-from src.navier_stokes_kovasznay.generate_dataset import exact_solution
+from src.navier_stokes_kovasznay.generate_dataset import exact_solution, scale_coords
 from src.visualization import plot_heatmap_comparison
 
 
@@ -19,9 +19,11 @@ def main(epoch, save_dir="src/figures"):
 
     u_exact, v_exact, p_exact = exact_solution(X, Y, nu)
 
+    # Use scaled coordinates for interpolation (matching PINN input space)
+    X_s, Y_s = scale_coords(X, Y)
     x_test_grid = np.hstack((
-        X.flatten().reshape(-1, 1),
-        Y.flatten().reshape(-1, 1),
+        X_s.flatten().reshape(-1, 1),
+        Y_s.flatten().reshape(-1, 1),
     ))
 
     # Load predictions
@@ -30,25 +32,27 @@ def main(epoch, save_dir="src/figures"):
     )
     uvp_pred_raw = torch.cat(uvp_pred_raw, dim=0).numpy()
 
-    u_pred = griddata(x_test_grid, uvp_pred_raw[:, 0], (X, Y), method="cubic")
-    v_pred = griddata(x_test_grid, uvp_pred_raw[:, 1], (X, Y), method="cubic")
-    p_pred = griddata(x_test_grid, uvp_pred_raw[:, 2], (X, Y), method="cubic")
+    u_pred = griddata(x_test_grid, uvp_pred_raw[:, 0], (X_s, Y_s), method="cubic")
+    v_pred = griddata(x_test_grid, uvp_pred_raw[:, 1], (X_s, Y_s), method="cubic")
+    p_pred = griddata(x_test_grid, uvp_pred_raw[:, 2], (X_s, Y_s), method="cubic")
 
     # Plot: exact vs PINN vs difference for each field
-    for field_name, exact, pred in [("u velocity", u_exact, u_pred),
-                                     ("v velocity", v_exact, v_pred),
-                                     ("pressure p", p_exact, p_pred)]:
-        safe_name = field_name.replace(" ", "_")
+    fields = [
+        ("u_velocity", r"$u$ [-]", "Kovasznay Flow — $u$ velocity", u_exact, u_pred),
+        ("v_velocity", r"$v$ [-]", "Kovasznay Flow — $v$ velocity", v_exact, v_pred),
+        ("pressure_p", r"$p$ [-]", "Kovasznay Flow — pressure $p$", p_exact, p_pred),
+    ]
+    for safe_name, field_label, title, exact, pred in fields:
         plot_heatmap_comparison(
             exact=exact,
             pred=pred,
             x_coords=x_domain,
             y_coords=y_domain,
-            x_label="x",
-            y_label="y",
-            field_label=field_name,
+            x_label=r"$x$ [-]",
+            y_label=r"$y$ [-]",
+            field_label=field_label,
             save_path=f"{save_dir}/navier_stokes_kovasznay_{safe_name}_comparison.png",
-            title=f"Kovasznay Flow - {field_name}",
+            title=title,
         )
 
 

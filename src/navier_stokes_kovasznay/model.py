@@ -50,13 +50,23 @@ class KovasznayPINNLosses:
         v_x, v_y, v_xx, v_yy,
         p_x, p_y,
         nu: float,
+        Sx: float,
+        Sy: float,
     ) -> torch.Tensor:
+        # Convert autograd derivatives (w.r.t. scaled inputs) to physical derivatives
+        # d/dx_phys = Sx * d/dx_star, d^2/dx_phys^2 = Sx^2 * d^2/dx_star^2
+        u_x_p, u_y_p = u_x * Sx, u_y * Sy
+        u_xx_p, u_yy_p = u_xx * Sx ** 2, u_yy * Sy ** 2
+        v_x_p, v_y_p = v_x * Sx, v_y * Sy
+        v_xx_p, v_yy_p = v_xx * Sx ** 2, v_yy * Sy ** 2
+        p_x_p, p_y_p = p_x * Sx, p_y * Sy
+
         # x-momentum: u*u_x + v*u_y + p_x - nu*(u_xx + u_yy) = 0
-        f_u = u * u_x + v * u_y + p_x - nu * (u_xx + u_yy)
+        f_u = u * u_x_p + v * u_y_p + p_x_p - nu * (u_xx_p + u_yy_p)
         # y-momentum: u*v_x + v*v_y + p_y - nu*(v_xx + v_yy) = 0
-        f_v = u * v_x + v * v_y + p_y - nu * (v_xx + v_yy)
+        f_v = u * v_x_p + v * v_y_p + p_y_p - nu * (v_xx_p + v_yy_p)
         # continuity: u_x + v_y = 0
-        f_c = u_x + v_y
+        f_c = u_x_p + v_y_p
 
         return torch.mean(f_u ** 2) + torch.mean(f_v ** 2) + torch.mean(f_c ** 2)
 
@@ -270,6 +280,8 @@ class KovasznayPINNRegressor(pl.LightningModule):
             v_x, v_y, v_xx, v_yy,
             p_x, p_y,
             nu=self.hparams.nu,
+            Sx=self.hparams.Sx,
+            Sy=self.hparams.Sy,
         ) * self.hparams.loss_PDE_param
 
         loss = loss_PDE + loss_BC

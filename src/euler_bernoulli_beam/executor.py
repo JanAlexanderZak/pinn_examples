@@ -15,10 +15,10 @@ from src.euler_bernoulli_beam.generate_dataset import (
 from src.euler_bernoulli_beam.visualization import visualize
 
 
-def main(epochs, load_case="cantilever_point_load"):
+def train_single(epochs, load_case="cantilever_point_load"):
     pl.seed_everything(6020)
 
-    path_to_data = "./src/euler_bernoulli_beam/data/"
+    path_to_data = f"./src/euler_bernoulli_beam/data/{load_case}/"
     generate_dataset(load_case=load_case, path=path_to_data)
 
     args = DeepLearningArguments(
@@ -96,9 +96,24 @@ def main(epochs, load_case="cantilever_point_load"):
     print(len(w_pred))
     torch.save(
         w_pred,
-        f"./src/euler_bernoulli_beam/data/predictions_{epochs}.pkl",
+        f"{path_to_data}/predictions_{epochs}.pkl",
     )
     visualize(model, load_case)
+
+
+LOAD_CASES = [
+    "cantilever_point_load",
+    "simply_supported_udl",
+    "cantilever_udl",
+]
+
+
+def main(epochs):
+    for load_case in LOAD_CASES:
+        print(f"\n{'='*60}")
+        print(f"Training: {load_case}")
+        print(f"{'='*60}\n")
+        train_single(epochs, load_case=load_case)
 
 
 if __name__ == "__main__":

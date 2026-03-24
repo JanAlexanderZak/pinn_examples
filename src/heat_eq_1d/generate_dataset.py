@@ -15,6 +15,9 @@ from pyDOE import lhs
 
 from src.visualization import pinn_style, save_figure, CMAP_SEQUENTIAL
 
+T_REF = 5.0   # Reference time (simulation end time)
+U_REF = 2.0   # Reference solution amplitude (approximate peak)
+
 
 def exact_solution(
     x: List[float],
@@ -22,7 +25,7 @@ def exact_solution(
     alpha: float,
 ):
     """ Returns the exact solution of the 1D heat equation
-    with heat source term sin(np.pi*x)
+    with heat source term 2*sin(np.pi*x)
     and initial condition sin(2*np.pi*x).
 
     Args:
@@ -99,12 +102,21 @@ def generate_dataset(path: str = "src/heat_eq_1d/data",):
     x_train_IC_BC = x_train_IC_BC[idx, :]
     y_train_IC_BC = y_train_IC_BC[idx, :]
 
+    # * Non-dimensionalization: scale t to [0,1] and u to O(1)
+    x_train_IC_BC[:, 1] /= T_REF
+    y_train_IC_BC /= U_REF
+    x_train[:, 1] /= T_REF
+    x_star[:, 1] /= T_REF
+
     # * Save
     np.save(os.path.join(path, "x_train_IC_BC"), x_train_IC_BC)
     np.save(os.path.join(path, "y_train_IC_BC"), y_train_IC_BC)
     np.save(os.path.join(path, "x_train"), x_train)
     np.save(os.path.join(path, "u_exact"), u_exact)
     np.save(os.path.join(path, "x_star"), x_star)
+    np.save(os.path.join(path, "scaling"), {
+        "T_ref": T_REF, "U_ref": U_REF,
+    })
 
 
 if __name__ == "__main__":

@@ -49,8 +49,11 @@ class InverseBurgersPINNLosses:
         u_x: torch.Tensor,
         u_xx: torch.Tensor,
         nu: torch.nn.parameter.Parameter,
+        L_ref: float,
     ) -> torch.Tensor:
-        return torch.mean((u_t + y_pred * u_x - nu * u_xx) ** 2)
+        return torch.mean((
+            u_t + y_pred * u_x / L_ref - nu * u_xx / L_ref ** 2
+        ) ** 2)
 
 
 class InverseBurgersPINNRegressor(pl.LightningModule):
@@ -95,8 +98,8 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
         self.train_r2 = R2Score()
         self.eval_r2 = R2Score()
 
-        # Learnable PDE parameter (viscosity)
-        self.nu = None
+        # Learnable PDE parameter (viscosity, log-space for positivity)
+        self.log_nu = None
         self.nus = None
 
     def configure_linears(self) -> torch.nn.modules.container.ModuleList:
@@ -123,17 +126,20 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
         return linears
 
     def configure_optimizers(self) -> Dict:
-        # Initialize learnable viscosity parameter
-        self.nu = torch.nn.Parameter(
+        # Initialize learnable viscosity parameter (log-space for positivity)
+        # Learn log(nu_hat) where nu = nu_hat * nu_scale, so nu_hat is O(1)
+        nu_scale = self.hparams.nu_scale
+        self.log_nu = torch.nn.Parameter(
             torch.tensor(
-                [self.hparams.nu_initial], requires_grad=True,
+                [np.log(self.hparams.nu_initial / nu_scale)],
+                requires_grad=True,
             )
         )
         self.nus = []
 
         if self.hparams.optimizer == torch.optim.LBFGS:
             optimizer = self.hparams.optimizer(
-                list(self.parameters()) + [self.nu],
+                list(self.parameters()) + [self.log_nu],
                 lr=self.hparams.learning_rate,
             )
         elif (
@@ -234,12 +240,15 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
             create_graph=True,
         )[0]
 
+        nu_hat = torch.exp(self.log_nu)
+        nu = nu_hat * self.hparams.nu_scale
         loss_PDE = self.pinn_losses.loss_function_PDE(
             u_pred_PDE,
             u_t,
             u_x,
             u_xx,
-            nu=self.nu,
+            nu=nu,
+            L_ref=self.hparams.L_ref,
         ) * self.hparams.loss_PDE_param
 
         loss = (
@@ -248,8 +257,8 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
             + loss_obs * self.hparams.loss_obs_param
         )
 
-        # Track nu evolution
-        self.nus.append(self.nu.item())
+        # Track physical nu evolution
+        self.nus.append(nu.item())
 
         # * Part 2: Logging
         self.log(
@@ -288,17 +297,18 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
             prog_bar=True, sync_dist=True,
         )
         self.log(
-            "train_param_nu", self.nu.item(),
+            "train_param_nu", nu.item(),
             sync_dist=True, on_epoch=True, prog_bar=True,
         )
 
         if self.current_epoch % 100 == 0:
             print(
                 'Iter %d, Loss: %.5e, Loss_IC_BC: %.5e,'
-                ' Loss_PDE: %.5e, Loss_obs: %.5e, nu: %.6f' % (
+                ' Loss_PDE: %.5e, Loss_obs: %.5e, nu: %.6f'
+                ' (nu_hat: %.4f)' % (
                     self.current_epoch, loss.item(),
                     loss_IC_BC.item(), loss_PDE.item(),
-                    loss_obs.item(), self.nu.item(),
+                    loss_obs.item(), nu.item(), nu_hat.item(),
                 )
             )
         return loss
@@ -308,6 +318,42 @@ class InverseBurgersPINNRegressor(pl.LightningModule):
 
     def test_step(self, val_batch, val_batch_idx, dataloader_idx=0) -> torch.Tensor:
         pass
+
+    def compute_full_loss(self, x_train_PDE, x_train_IC_BC, y_train_IC_BC, x_obs, u_obs):
+        """Compute full loss over all data (for L-BFGS refinement)."""
+        x_pde_x = x_train_PDE[:, 0:1].clone().detach().requires_grad_(True)
+        x_pde_t = x_train_PDE[:, 1:2].clone().detach().requires_grad_(True)
+
+        u_pred_IC_BC = self.forward(x_train_IC_BC)
+        loss_IC_BC = self.pinn_losses.loss_function_IC_BC(u_pred_IC_BC, y_train_IC_BC)
+
+        u_pred_obs = self.forward(x_obs)
+        loss_obs = self.pinn_losses.loss_function_obs(u_pred_obs, u_obs)
+
+        nu = torch.exp(self.log_nu) * self.hparams.nu_scale
+        u_pred_PDE = self.net(x_pde_x, x_pde_t)
+        u_t = torch.autograd.grad(
+            u_pred_PDE, x_pde_t, torch.ones_like(u_pred_PDE),
+            retain_graph=True, create_graph=True,
+        )[0]
+        u_x = torch.autograd.grad(
+            u_pred_PDE, x_pde_x, torch.ones_like(u_pred_PDE),
+            retain_graph=True, create_graph=True,
+        )[0]
+        u_xx = torch.autograd.grad(
+            u_x, x_pde_x, torch.ones_like(u_x),
+            retain_graph=True, create_graph=True,
+        )[0]
+        loss_PDE = self.pinn_losses.loss_function_PDE(
+            u_pred_PDE, u_t, u_x, u_xx, nu=nu,
+            L_ref=self.hparams.L_ref,
+        )
+
+        return (
+            loss_PDE * self.hparams.loss_PDE_param
+            + loss_IC_BC * self.hparams.loss_IC_BC_param
+            + loss_obs * self.hparams.loss_obs_param
+        )
 
     def predict_step(self, pred_batch, batch_idx) -> torch.Tensor:
         u_pred = self.forward(pred_batch[0])

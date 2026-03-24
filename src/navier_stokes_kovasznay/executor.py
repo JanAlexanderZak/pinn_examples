@@ -1,5 +1,7 @@
 """ Executable example of Kovasznay flow (steady 2D Navier-Stokes) in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 import numpy as np
@@ -9,7 +11,7 @@ from src.navier_stokes_kovasznay.model import KovasznayPINNRegressor
 from src.navier_stokes_kovasznay.data_module import (
     KovasznayPINNDataModule,
 )
-from src.navier_stokes_kovasznay.generate_dataset import generate_dataset
+from src.navier_stokes_kovasznay.generate_dataset import generate_dataset, SX, SY
 from src.navier_stokes_kovasznay.visualization import main as visualize
 
 
@@ -47,6 +49,8 @@ def main(epochs):
         "dropout_p": 0.1,
         "batch_normalization": False,
         "nu": 1.0 / Re,
+        "Sx": SX,
+        "Sy": SY,
     }
 
     data_module = KovasznayPINNDataModule(
@@ -87,9 +91,11 @@ def main(epochs):
     )
     uvp_pred = trainer.predict(model, dataloaders=test_loader)
     print(len(uvp_pred))
+    predictions_dir = "./src/navier_stokes_kovasznay/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
     torch.save(
         uvp_pred,
-        f"./src/navier_stokes_kovasznay/data/predictions/predictions_{epochs}.pkl",
+        f"{predictions_dir}/predictions_{epochs}.pkl",
     )
     visualize(epochs)
 

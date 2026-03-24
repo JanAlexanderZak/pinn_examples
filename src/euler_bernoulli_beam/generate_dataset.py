@@ -11,6 +11,9 @@ Derived quantities:
     moment:  M(x)     = EI * d2w/dx2
     shear:   V(x)     = EI * d3w/dx3
 
+Sign convention (w positive downward):
+    M = EI * d2w/dx2,  V = EI * d3w/dx3
+
 Load cases:
     1. cantilever_point_load: Cantilever beam with point load P at free end
     2. simply_supported_udl:  Simply supported beam with uniform distributed load q0
@@ -64,12 +67,12 @@ def exact_solution(x, load_case, L=1.0, EI=1.0, P=1.0, q0=1.0):
         # Pinned at x=0 and x=L, uniform load q0
         # w(x)     = q0/(24EI) * (x^4 - 2L x^3 + L^3 x)
         # theta(x) = q0/(24EI) * (4x^3 - 6L x^2 + L^3)
-        # M(x)     = q0/2 * (L x - x^2)
-        # V(x)     = q0 * (L/2 - x)
+        # M(x)     = q0/2 * (x^2 - L x)
+        # V(x)     = q0 * (x - L/2)
         w = (q0 / (24 * EI)) * (x**4 - 2 * L * x**3 + L**3 * x)
         theta = (q0 / (24 * EI)) * (4 * x**3 - 6 * L * x**2 + L**3)
-        M = (q0 / 2) * (L * x - x**2)
-        V = q0 * (L / 2 - x)
+        M = (q0 / 2) * (x**2 - L * x)
+        V = q0 * (x - L / 2)
 
     elif load_case == "cantilever_udl":
         # Fixed at x=0, free at x=L, uniform load q0
@@ -189,4 +192,8 @@ def generate_dataset(
 
 
 if __name__ == "__main__":
-    generate_dataset()
+    for case in ["cantilever_point_load", "simply_supported_udl", "cantilever_udl"]:
+        generate_dataset(
+            load_case=case,
+            path=f"src/euler_bernoulli_beam/data/{case}",
+        )

@@ -42,9 +42,9 @@ def main(epoch, save_dir="src/figures"):
         pred=u_pred.T,
         x_coords=t_domain,
         y_coords=x_domain,
-        x_label="t",
-        y_label="x",
-        field_label="u(x,t)",
+        x_label=r"$t$ [-]",
+        y_label=r"$x$ [-]",
+        field_label=r"$u$ [-]",
         save_path=f"{save_dir}/wave_eq_1d_analytical_vs_pinn.png",
     )
 

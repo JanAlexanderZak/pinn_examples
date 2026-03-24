@@ -17,6 +17,22 @@ import numpy as np
 
 from pyDOE import lhs
 
+# Domain bounds and derived scaling factors for non-dimensionalization
+X_MIN, X_MAX = -0.5, 1.0
+Y_MIN, Y_MAX = -0.5, 1.5
+LX = X_MAX - X_MIN  # 1.5
+LY = Y_MAX - Y_MIN  # 2.0
+# Chain-rule scale factors: derivative w.r.t. physical = derivative w.r.t. scaled * S
+SX = 2.0 / LX  # = 4/3
+SY = 2.0 / LY  # = 1.0
+
+
+def scale_coords(x, y):
+    """Map physical (x,y) to [-1,1]^2."""
+    x_star = (x - X_MIN) / (LX / 2.0) - 1.0
+    y_star = (y - Y_MIN) / (LY / 2.0) - 1.0
+    return x_star, y_star
+
 
 def exact_solution(x, y, nu):
     lam = 1.0 / (2.0 * nu) - np.sqrt(1.0 / (4.0 * nu**2) + 4.0 * np.pi**2)
@@ -98,6 +114,17 @@ def generate_dataset(path: str = "src/navier_stokes_kovasznay/data"):
     x_train_BC = x_train_BC[idx, :]
     y_train_BC = y_train_BC[idx, :]
 
+    # * Non-dimensionalization: scale inputs to [-1, 1]^2
+    x_train_BC[:, 0], x_train_BC[:, 1] = scale_coords(
+        x_train_BC[:, 0], x_train_BC[:, 1]
+    )
+    x_train[:, 0], x_train[:, 1] = scale_coords(
+        x_train[:, 0], x_train[:, 1]
+    )
+    x_star[:, 0], x_star[:, 1] = scale_coords(
+        x_star[:, 0], x_star[:, 1]
+    )
+
     # * Save
     np.save(os.path.join(path, "x_train_BC"), x_train_BC)
     np.save(os.path.join(path, "y_train_BC"), y_train_BC)
@@ -106,6 +133,7 @@ def generate_dataset(path: str = "src/navier_stokes_kovasznay/data"):
     np.save(os.path.join(path, "u_exact"), u_exact)
     np.save(os.path.join(path, "v_exact"), v_exact)
     np.save(os.path.join(path, "p_exact"), p_exact)
+    np.save(os.path.join(path, "scaling"), {"Sx": SX, "Sy": SY})
 
 
 if __name__ == "__main__":

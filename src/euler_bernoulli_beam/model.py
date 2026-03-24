@@ -5,6 +5,7 @@ Governing ODE (4th order):
 
 Single-output network: input x -> output w(x).
 Slope, moment, and shear are derived via automatic differentiation.
+Sign convention: M = EI * d2w/dx2, V = EI * d3w/dx3 (w positive downward).
 
 Boundary conditions are enforced via loss terms that match the predicted
 derivative of the appropriate order to the prescribed value. The BC order

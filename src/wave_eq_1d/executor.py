@@ -1,5 +1,7 @@
 """ Executable example of 1D wave equation in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 import numpy as np
@@ -84,11 +86,9 @@ def main(epochs):
     )
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))
-    pred_path = (
-        "./src/wave_eq_1d"
-        f"/data/predictions/predictions_{epochs}.pkl"
-    )
-    torch.save(u_pred, pred_path)
+    predictions_dir = "./src/wave_eq_1d/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
+    torch.save(u_pred, f"{predictions_dir}/predictions_{epochs}.pkl")
     visualize(epochs)
 
 if __name__ == "__main__":

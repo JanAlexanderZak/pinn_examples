@@ -11,11 +11,14 @@ import scipy
 
 from pyDOE import lhs
 
+L_REF = 8.0  # Reference length for non-dimensionalization (half-domain width)
+NU_SCALE = 0.01  # Reference scale for viscosity (makes learned nu_hat O(1))
+
 
 def generate_dataset(path: str = "./src/inverse_burgers/data/"):
     n_bc_points = 100
     n_collocation_points = 10000
-    n_observation_points = 200
+    n_observation_points = 2000
     noise_level = 0.01
 
     data = scipy.io.loadmat("src/raissi_burgers/data/burgers_shock.mat")
@@ -68,6 +71,16 @@ def generate_dataset(path: str = "./src/inverse_burgers/data/"):
         + noise_level * np.random.randn(n_observation_points, 1)
     )
 
+    # * Non-dimensionalization: scale x to [-1, 1]
+    all_x_train_IC_BC[:, 0] /= L_REF
+    x_train[:, 0] /= L_REF
+    x_star[:, 0] /= L_REF
+    x_obs[:, 0] /= L_REF
+
+    # Re-subsample IC/BC after scaling (indices already chosen above)
+    x_train_IC_BC = all_x_train_IC_BC[idx, :]
+    y_train_IC_BC = all_y_train_IC_BC[idx, :]
+
     # * Save
     np.save(os.path.join(path, "x_train_IC_BC"), x_train_IC_BC)
     np.save(os.path.join(path, "y_train_IC_BC"), y_train_IC_BC)
@@ -75,6 +88,9 @@ def generate_dataset(path: str = "./src/inverse_burgers/data/"):
     np.save(os.path.join(path, "x_star"), x_star)
     np.save(os.path.join(path, "x_obs"), x_obs)
     np.save(os.path.join(path, "u_obs"), u_obs)
+    np.save(os.path.join(path, "scaling"), {
+        "L_ref": L_REF, "nu_scale": NU_SCALE,
+    })
 
 
 if __name__ == "__main__":

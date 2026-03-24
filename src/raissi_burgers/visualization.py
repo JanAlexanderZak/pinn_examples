@@ -5,6 +5,7 @@ import numpy as np
 from pyDOE import lhs
 from scipy.interpolate import griddata
 
+from src.raissi_burgers.generate_dataset import L_REF
 from src.visualization import plot_single_heatmap
 
 
@@ -21,8 +22,9 @@ def main(epoch, save_dir="src/figures"):
     u_exact = np.real(data["usol"]).T
 
     X, T = np.meshgrid(x_domain, t_domain)  # (100, 256), (100, 256)
+    # x_star uses scaled x (matching PINN input space) for griddata interpolation
     x_star = np.hstack((
-        X.flatten().reshape(-1, 1),
+        X.flatten().reshape(-1, 1) / L_REF,
         T.flatten().reshape(-1, 1),
     ))  # (256*100=25600, 2)
 
@@ -60,7 +62,9 @@ def main(epoch, save_dir="src/figures"):
     )
     u_pred_raw = torch.load(path)
     u_pred_raw = torch.tensor(u_pred_raw).reshape(-1, 1)
-    u_pred = griddata(x_star, u_pred_raw.flatten(), (X, T), method='cubic')
+    # Interpolate in scaled space, then plot in physical space
+    X_scaled = X / L_REF
+    u_pred = griddata(x_star, u_pred_raw.flatten(), (X_scaled, T), method='cubic')
 
     # * Visualize
     plot_single_heatmap(
@@ -71,10 +75,10 @@ def main(epoch, save_dir="src/figures"):
             x_domain.min(),
             x_domain.max(),
         ],
-        title="$u(x,t)$",
-        x_label="$t$",
-        y_label="$x$",
-        cbar_label="u",
+        title=r"$u(x,t)$",
+        x_label=r"$t$ [-]",
+        y_label=r"$x$ [-]",
+        cbar_label=r"$u$ [-]",
         save_path=f"{save_dir}/raissi_burgers_solution.png",
         scatter_data=(x_train_IC_BC[:, 1], x_train_IC_BC[:, 0]),
         scatter_kwargs={

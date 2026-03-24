@@ -104,7 +104,15 @@ def main():
         train_dataloaders=train_loader,
         val_dataloaders=val_loader,
     )
-    visualize(model, trainer.current_epoch)
+
+    epoch = trainer.current_epoch
+    t_test = torch.linspace(0, 1, 300).view(-1, 1)
+    y_pred = model.forward(t_test).detach()
+    torch.save(
+        {"t": t_test, "y_pred": y_pred, "epoch": epoch},
+        f"./src/moseley_oscillator/data/predictions_{epoch}.pkl",
+    )
+    visualize(model, epoch)
 
 
 if __name__ == "__main__":

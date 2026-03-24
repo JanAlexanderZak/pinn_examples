@@ -1,5 +1,7 @@
 """ Executable example of Raissi's Allen-Cahn equation in PyTorch Lightning.
 """
+import os
+
 import pytorch_lightning as pl
 import torch
 
@@ -15,7 +17,7 @@ def main(epochs):
     generate_dataset()
     args = DeepLearningArguments(
         seed=6020,
-        batch_size=64,
+        batch_size=200,
         max_epochs=epochs,
         min_epochs=10000,
         num_workers=6,
@@ -42,6 +44,8 @@ def main(epochs):
         "dropout": False,
         "dropout_p": 0.1,
         "batch_normalization": False,
+        "epsilon_sq": 0.0001,  # Diffusion coefficient (interface width squared)
+        "reaction_coeff": 5.0,  # Reaction term coefficient
     }
 
     data_module = RaissiPINNDataModule(
@@ -68,6 +72,8 @@ def main(epochs):
         "train_loss", patience=1000, verbose=True,
     )
     model_summary = pl.callbacks.ModelSummary(max_depth=1)
+
+    hyper_parameters["dt"] = data_module.dt
 
     model = RaissiPINNRegressor(
         hyper_parameters=hyper_parameters,
@@ -97,8 +103,10 @@ def main(epochs):
     #print(trainer.test(model=model, dataloaders=test_loader,))
     u_pred = trainer.predict(model, dataloaders=test_loader,)
     print(len(u_pred))
+    predictions_dir = "./src/raissi_allen_cahn/data/predictions"
+    os.makedirs(predictions_dir, exist_ok=True)
     pred_path = (
-        "./src/raissi_allen_cahn/data/predictions/"
+        f"{predictions_dir}/"
         f"predictions_{hyper_parameters['learning_rate']}"
         f"_{hyper_parameters['loss_IC_param']}"
         f"_{hyper_parameters['num_hidden_layers']}"

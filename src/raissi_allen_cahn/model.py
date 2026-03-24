@@ -174,7 +174,6 @@ class RaissiPINNRegressor(pl.LightningModule):
             optimizer=optimizer,
             mode="min",
             patience=self.hparams.scheduler_patience,
-            verbose=True,
         )
 
         return {
@@ -218,10 +217,6 @@ class RaissiPINNRegressor(pl.LightningModule):
         """
         pass
 
-    def net(self, x, t):
-        # This is actually a nececessity for autograd to build the graph
-        return self.forward(torch.cat([x, t], dim=1))
-
     def training_step(self, train_batch, batch_idx) -> torch.Tensor:
         # * Part 1: Calculation
 
@@ -257,12 +252,14 @@ class RaissiPINNRegressor(pl.LightningModule):
             create_graph=True,
         )[0]
 
+        rc = self.hparams.reaction_coeff
+        eps2 = self.hparams.epsilon_sq
         F = (
-            5.0 * y_pred_IC_minus
-            - 5.0 * y_pred_IC_minus ** 3
-            + 0.0001 * u_IC_xx
+            rc * y_pred_IC_minus
+            - rc * y_pred_IC_minus ** 3
+            + eps2 * u_IC_xx
         )
-        u0 = y_pred_IC - 0.8 * torch.matmul(F, self.irk_weights.T)
+        u0 = y_pred_IC - self.hparams.dt * torch.matmul(F, self.irk_weights.T)
 
         loss_IC = (
             self.pinn_losses.loss_function_IC(u0, y_train_IC)
@@ -281,7 +278,10 @@ class RaissiPINNRegressor(pl.LightningModule):
 
         # y_pred_BC[0, :] torch.Size([101])
 
-        loss_BC = self.pinn_losses.loss_function_BC(y_pred_BC, u_BC_x)
+        loss_BC = (
+            self.pinn_losses.loss_function_BC(y_pred_BC, u_BC_x)
+            * self.hparams.loss_BC_param
+        )
 
         loss = loss_IC + loss_BC
 
